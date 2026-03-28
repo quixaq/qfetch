@@ -1,0 +1,62 @@
+modules:
+  general:
+    - id: title
+      enabled: true
+      key: ""
+    - id: os
+      enabled: true
+      key: OS
+    - id: host
+      enabled: true
+      key: Host
+    - id: kernel
+      enabled: true
+      key: Kernel
+    - id: uptime
+      enabled: true
+      key: Uptime
+    - id: shell
+      enabled: true
+      key: Shell
+    - id: de
+      enabled: true
+      key: DE
+    - id: theme
+      enabled: true
+      key: Theme
+    - id: cursor
+      enabled: true
+      key: Cursor
+    - id: cpu
+      enabled: true
+      key: CPU
+    - id: gpu
+      enabled: true
+      key: GPU
+    - id: ram
+      enabled: true
+      key: Memory
+    - id: swap
+      enabled: true
+      key: Swap
+    - id: locale
+      enabled: true
+      key: Locale
+    - id: standard_palette
+      enabled: true
+      key: ""
+    - id: bright_palette
+      enabled: true
+      key: ""
+colors:
+  title: "#b19cd9"
+  keys: "#b19cd9"
+  separator: "#ff6961"
+  values: "#eec1cb"
+logo:
+  enabled: true
+  include: # the first logo on the list will be used as fallback
+    - id: nixos
+      colors:
+        - "#967ce2"
+        - "#8951c1"
