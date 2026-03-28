@@ -159,17 +159,23 @@ pub fn memory() -> (Option<String>, Option<String>) {
     let mut total_swap = 0;
     let mut free_swap = 0;
 
+    let mut found: usize = 0;
+
     for line in reader.lines().map_while(Result::ok) {
         if line.starts_with("MemTotal:") {
-            total = parse_kb(&line)
+            total = parse_kb(&line);
+            found += 1;
         } else if line.starts_with("MemAvailable:") {
-            available = parse_kb(&line)
+            available = parse_kb(&line);
+            found += 1;
         } else if line.starts_with("SwapTotal:") {
-            total_swap = parse_kb(&line)
+            total_swap = parse_kb(&line);
+            found += 1;
         } else if line.starts_with("SwapFree:") {
-            free_swap = parse_kb(&line)
+            free_swap = parse_kb(&line);
+            found += 1;
         }
-        if total > 0 && available > 0 && total_swap > 0 && free_swap > 0 {
+        if found == 4 {
             break;
         }
     }
