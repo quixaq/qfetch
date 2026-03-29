@@ -6,8 +6,12 @@ repository = "https://github.com/quixaq/qfetch"
 readme = "README.md"
 keywords = ["cli", "fetch", "system", "linux", "system-info"]
 categories = ["command-line-utilities"]
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
+
+[[bin]]
+name = "qfetch"
+path = "src/main.rs"
 
 [dependencies]
 console = "0.16.2"
