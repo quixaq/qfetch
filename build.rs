@@ -1,6 +1,6 @@
 use console::measure_text_width;
 use serde::Deserialize;
-use std::fs;
+use std::{env, fs};
 
 #[derive(Deserialize)]
 struct Module {
@@ -43,8 +43,10 @@ struct Config {
 
 fn main() {
     println!("cargo:rerun-if-changed=config.yaml");
+    println!("cargo:rerun-if-env-changed=CONFIG_FILE_PATH");
 
-    let yaml_str = fs::read_to_string("config.yaml").expect("Failed to read config.yaml");
+    let config_path = env::var("CONFIG_FILE_PATH").unwrap_or_else(|_| "config.yaml".to_string());
+    let yaml_str = fs::read_to_string(&config_path).expect("Failed to read config.yaml");
     let config: Config = serde_yaml::from_str(&yaml_str).expect("Failed to parse YAML config.");
 
     let mut constants: Vec<String> = Vec::new();

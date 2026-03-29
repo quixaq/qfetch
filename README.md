@@ -2,10 +2,15 @@
 A blazing fast, highly configurable and lightweight fetch tool written in Rust.
 
 ## Installation
+### cargo
+```bash
+CONFIG_FILE_PATH=/path/to/file cargo install qfetch-cli
+```
 ### Manual Build
 ```bash
 cargo build --release
 ```
+You can optionally use CONFIG_FILE_PATH=/path/to/file before the build command if you want to use a custom path for it.
 
 ### NixOS
 Add qfetch to your nix flake inputs
@@ -28,6 +33,9 @@ outputs = { nixpkgs, qfetch, ... }: {
 ### General
 Remember to use full hex codes in colors since expanding them is not implemented.
 For `logo.include`, the first logo will be used as fallback, also remember that every logo you include will be directly included in the binary so it may increase execution time. You can see the available logos in the `logo` dir.
+### cargo
+Get the default `config.yaml` file from the repository and make changes there and point the CONFIG_FILE_PATH env variable to it.
+The modules are ordered in the way you order them in the config.
 ### Manual Build
 Modify the `config.yaml` file in the project dir and rebuild.
 The modules are ordered in the way you order them in the config.
