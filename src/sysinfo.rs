@@ -114,13 +114,13 @@ pub fn theme() -> Option<String> {
 pub fn cursor() -> Option<String> {
     if let Ok(xcursor) = std::env::var("XCURSOR_THEME") {
         if let Ok(size) = std::env::var("XCURSOR_SIZE") {
-            return Some(format!("{} ({})", xcursor, size));
+            return Some(format!("{} ({}px)", xcursor, size));
         }
         return Some(xcursor);
     }
     if let Ok(hyprcursor) = std::env::var("HYPRCURSOR_THEME") {
         if let Ok(size) = std::env::var("HYPRCURSOR_SIZE") {
-            return Some(format!("{} ({})", hyprcursor, size));
+            return Some(format!("{} ({}px)", hyprcursor, size));
         }
         return Some(hyprcursor);
     }
