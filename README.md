@@ -72,6 +72,7 @@ qfetch with all modules enabled:
 Benchmark 1: qfetch
   Time (mean ± σ):       1.5 ms ±   0.1 ms    [User: 1.0 ms, System: 0.4 ms]
   Range (min … max):     1.3 ms …   2.0 ms    2200 runs
+```
 
 fastfetch will the same modules enabled:
 ```bash
