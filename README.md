@@ -69,10 +69,9 @@ qfetch.settings = {
 qfetch with all modules enabled:
 ```bash
 > hyperfine -N --warmup 2500 qfetch
-Benchmark 1: ./qfetch/target/release/qfetch
-  Time (mean ± σ):       1.5 ms ±   0.1 ms    [User: 1.1 ms, System: 0.4 ms]
-  Range (min … max):     1.3 ms …   1.9 ms    2039 runs
-```
+Benchmark 1: qfetch
+  Time (mean ± σ):       1.5 ms ±   0.1 ms    [User: 1.0 ms, System: 0.4 ms]
+  Range (min … max):     1.3 ms …   2.0 ms    2200 runs
 
 fastfetch will the same modules enabled:
 ```bash

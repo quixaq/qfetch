@@ -6,7 +6,7 @@ repository = "https://github.com/quixaq/qfetch"
 readme = "README.md"
 keywords = ["cli", "fetch", "system", "linux", "system-info"]
 categories = ["command-line-utilities"]
-version = "0.1.6"
+version = "0.1.7"
 edition = "2024"
 
 [[bin]]
@@ -24,3 +24,10 @@ terminal_size = "0.4.4"
 console = "0.16.2"
 serde = { version = "1.0.228", features = [ "derive" ]}
 serde_yaml = "0.9.34"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
