@@ -6,6 +6,7 @@ repository = "https://github.com/quixaq/qfetch"
 readme = "README.md"
 keywords = ["cli", "fetch", "system", "linux", "system-info"]
 categories = ["command-line-utilities"]
+authors = ["Quixaq <quixaq@tutamail.com>"]
 version = "0.1.7"
 edition = "2024"
 
