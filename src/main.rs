@@ -1,5 +1,5 @@
 /*
- *     qfetch v0.1.8
+ *     qfetch v0.1.9
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -37,63 +37,92 @@ const STANDARD_PALETTE: &str = "\x1b[40m   \x1b[41m   \x1b[42m   \x1b[43m   \x1b
 const BRIGHT_PALETTE: &str = "\x1b[100m   \x1b[101m   \x1b[102m   \x1b[103m   \x1b[104m   \x1b[105m   \x1b[106m   \x1b[107m   \x1b[0m";
 
 fn main() {
-    let (pretty, id, id_like) = sysinfo::distro();
-    let (title, sep) = sysinfo::title();
-    let (ram, swap) = sysinfo::memory();
+    let (mut pretty, id, id_like) = sysinfo::distro();
+    if !OS_ENABLED {
+        pretty = None
+    }
+    let (title, sep) = if TITLE_ENABLED {
+        sysinfo::title()
+    } else {
+        (None, None)
+    };
+    let host = if HOST_ENABLED { sysinfo::host() } else { None };
+    let uptime = if UPTIME_ENABLED {
+        sysinfo::uptime()
+    } else {
+        None
+    };
+    let shell = if SHELL_ENABLED {
+        sysinfo::shell()
+    } else {
+        None
+    };
+    let kernel = if KERNEL_ENABLED {
+        sysinfo::kernel()
+    } else {
+        None
+    };
+    let de = if DE_ENABLED { sysinfo::de() } else { None };
+    let theme = if THEME_ENABLED {
+        sysinfo::theme()
+    } else {
+        None
+    };
+    let cursor = if CURSOR_ENABLED {
+        sysinfo::cursor()
+    } else {
+        None
+    };
+    let cpu = if CPU_ENABLED { sysinfo::cpu() } else { None };
+    let gpu = if GPU_ENABLED { sysinfo::gpu() } else { None };
+    let locale = if LOCALE_ENABLED {
+        sysinfo::locale()
+    } else {
+        None
+    };
+    let (ram, swap) = if RAM_ENABLED || SWAP_ENABLED {
+        let (r, s) = sysinfo::memory();
+        (
+            if RAM_ENABLED { r } else { None },
+            if SWAP_ENABLED { s } else { None },
+        )
+    } else {
+        (None, None)
+    };
+    let palette_sep = if STANDARD_PALETTE_ENABLED || BRIGHT_PALETTE_ENABLED {
+        Some("".to_string())
+    } else {
+        None
+    };
+    let standard_palette = if STANDARD_PALETTE_ENABLED {
+        Some(STANDARD_PALETTE.to_string())
+    } else {
+        None
+    };
+    let bright_palette = if BRIGHT_PALETTE_ENABLED {
+        Some(BRIGHT_PALETTE.to_string())
+    } else {
+        None
+    };
     let mut info = [
-        (0, TITLE_ENABLED, TITLE_KEY, title),
-        (1, TITLE_ENABLED, TITLE_KEY, sep),
-        (OS_PRIORITY, OS_ENABLED, OS_KEY, pretty),
-        (HOST_PRIORITY, HOST_ENABLED, HOST_KEY, sysinfo::host()),
-        (
-            UPTIME_PRIORITY,
-            UPTIME_ENABLED,
-            UPTIME_KEY,
-            sysinfo::uptime(),
-        ),
-        (SHELL_PRIORITY, SHELL_ENABLED, SHELL_KEY, sysinfo::shell()),
-        (
-            KERNEL_PRIORITY,
-            KERNEL_ENABLED,
-            KERNEL_KEY,
-            sysinfo::kernel(),
-        ),
-        (DE_PRIORITY, DE_ENABLED, DE_KEY, sysinfo::de()),
-        (THEME_PRIORITY, THEME_ENABLED, THEME_KEY, sysinfo::theme()),
-        (
-            CURSOR_PRIORITY,
-            CURSOR_ENABLED,
-            CURSOR_KEY,
-            sysinfo::cursor(),
-        ),
-        (CPU_PRIORITY, CPU_ENABLED, CPU_KEY, sysinfo::cpu()),
-        (GPU_PRIORITY, GPU_ENABLED, GPU_KEY, sysinfo::gpu()),
-        (
-            LOCALE_PRIORITY,
-            LOCALE_ENABLED,
-            LOCALE_KEY,
-            sysinfo::locale(),
-        ),
-        (RAM_PRIORITY, RAM_ENABLED, RAM_KEY, ram),
-        (SWAP_PRIORITY, SWAP_ENABLED, SWAP_KEY, swap),
-        (
-            997,
-            STANDARD_PALETTE_ENABLED || BRIGHT_PALETTE_ENABLED,
-            "",
-            Some("".to_string()),
-        ),
-        (
-            998,
-            STANDARD_PALETTE_ENABLED,
-            STANDARD_PALETTE_KEY,
-            Some(STANDARD_PALETTE.to_string()),
-        ),
-        (
-            999,
-            BRIGHT_PALETTE_ENABLED,
-            BRIGHT_PALETTE_KEY,
-            Some(BRIGHT_PALETTE.to_string()),
-        ),
+        (0, TITLE_KEY, title),
+        (1, TITLE_KEY, sep),
+        (OS_PRIORITY, OS_KEY, pretty),
+        (HOST_PRIORITY, HOST_KEY, host),
+        (UPTIME_PRIORITY, UPTIME_KEY, uptime),
+        (SHELL_PRIORITY, SHELL_KEY, shell),
+        (KERNEL_PRIORITY, KERNEL_KEY, kernel),
+        (DE_PRIORITY, DE_KEY, de),
+        (THEME_PRIORITY, THEME_KEY, theme),
+        (CURSOR_PRIORITY, CURSOR_KEY, cursor),
+        (CPU_PRIORITY, CPU_KEY, cpu),
+        (GPU_PRIORITY, GPU_KEY, gpu),
+        (LOCALE_PRIORITY, LOCALE_KEY, locale),
+        (RAM_PRIORITY, RAM_KEY, ram),
+        (SWAP_PRIORITY, SWAP_KEY, swap),
+        (253, "", palette_sep),
+        (254, STANDARD_PALETTE_KEY, standard_palette),
+        (255, BRIGHT_PALETTE_KEY, bright_palette),
     ];
     info.sort_unstable();
     let mut out = String::with_capacity(256);
@@ -109,10 +138,8 @@ fn main() {
         .map(|(Width(w), _)| w as usize)
         .unwrap_or(usize::MAX);
     let mut line = 0;
-    for (_, enabled, name, value) in info {
-        if let Some(val) = value
-            && enabled
-        {
+    for (_, name, value) in info {
+        if let Some(val) = value {
             let out_line = format!(
                 "{}{}{}{}\x1b[0m",
                 logo_lines.get(line).unwrap_or(&""),
