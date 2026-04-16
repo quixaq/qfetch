@@ -1,5 +1,5 @@
 /*
- *     qfetch v0.1.7
+ *     qfetch v0.1.8
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
