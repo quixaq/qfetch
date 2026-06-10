@@ -1,5 +1,5 @@
 /*
- *     qfetch v0.1.9
+ *     qfetch v0.1.10
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,22 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+include!(concat!(env!("OUT_DIR"), "/config.rs"));
+
 mod sysinfo;
 use console::{measure_text_width, truncate_str};
 use std::fmt::Write;
 use terminal_size::{Width, terminal_size};
-
-use crate::config::{
-    BRIGHT_PALETTE_ENABLED, BRIGHT_PALETTE_KEY, CPU_ENABLED, CPU_KEY, CPU_PRIORITY, CURSOR_ENABLED,
-    CURSOR_KEY, CURSOR_PRIORITY, DE_ENABLED, DE_KEY, DE_PRIORITY, GPU_ENABLED, GPU_KEY,
-    GPU_PRIORITY, HOST_ENABLED, HOST_KEY, HOST_PRIORITY, KERNEL_ENABLED, KERNEL_KEY,
-    KERNEL_PRIORITY, LOCALE_ENABLED, LOCALE_KEY, LOCALE_PRIORITY, LOGO_ENABLED, OS_ENABLED, OS_KEY,
-    OS_PRIORITY, RAM_ENABLED, RAM_KEY, RAM_PRIORITY, SHELL_ENABLED, SHELL_KEY, SHELL_PRIORITY,
-    STANDARD_PALETTE_ENABLED, STANDARD_PALETTE_KEY, SWAP_ENABLED, SWAP_KEY, SWAP_PRIORITY,
-    THEME_ENABLED, THEME_KEY, THEME_PRIORITY, TITLE_ENABLED, TITLE_KEY, UPTIME_ENABLED, UPTIME_KEY,
-    UPTIME_PRIORITY, VALUES_COLOR,
-};
-mod config;
 
 const STANDARD_PALETTE: &str = "\x1b[40m   \x1b[41m   \x1b[42m   \x1b[43m   \x1b[44m   \x1b[45m   \x1b[46m   \x1b[47m   \x1b[0m";
 const BRIGHT_PALETTE: &str = "\x1b[100m   \x1b[101m   \x1b[102m   \x1b[103m   \x1b[104m   \x1b[105m   \x1b[106m   \x1b[107m   \x1b[0m";
@@ -128,7 +118,7 @@ fn main() {
     let mut out = String::with_capacity(256);
     let mut logo = "";
     if LOGO_ENABLED {
-        logo = config::get_logo(
+        logo = get_logo(
             &id.unwrap_or("".to_string()),
             &id_like.unwrap_or("".to_string()),
         );

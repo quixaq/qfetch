@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Quixaq
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 use size::Size;
 use std::fmt::Write;
 use std::fs::{self, File};
@@ -6,7 +9,7 @@ use std::path::Path;
 
 use gethostname::gethostname;
 
-use crate::config::TITLE_COLOR;
+use crate::TITLE_COLOR;
 
 pub fn title() -> (Option<String>, Option<String>) {
     let Ok(user) = std::env::var("USER").or_else(|_| std::env::var("LOGNAME")) else {

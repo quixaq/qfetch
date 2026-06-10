@@ -1,6 +1,6 @@
 use console::measure_text_width;
 use serde::Deserialize;
-use std::{env, fs};
+use std::{env, fs, path::Path};
 
 #[derive(Deserialize)]
 struct Module {
@@ -190,5 +190,7 @@ fn main() {
         constants.join("\n")
     );
 
-    fs::write("src/config.rs", code).unwrap()
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let path = Path::new(&out_dir).join("config.rs");
+    fs::write(path, code).unwrap()
 }
