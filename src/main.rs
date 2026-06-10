@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Quixaq
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /*
  *     qfetch v0.1.10
  * Copyright (C) 2026  Quixaq
