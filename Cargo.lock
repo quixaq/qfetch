@@ -50,9 +50,9 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "getgpuname"
-version = "0.1.4"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c54f0aedff5ac61431b143819eafa14453fb18933ee8b9d3a7ef9e076898e85"
+checksum = "65ff17560468ba3711759502c5e72eb4f2bb673dc47818811573641ae012bef2"
 dependencies = [
  "pci-ids",
  "phf 0.13.1",
