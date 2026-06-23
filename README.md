@@ -1,6 +1,11 @@
 # qfetch
 A blazing fast, highly configurable and lightweight fetch tool written in Rust.
 
+[![Build](https://img.shields.io/github/actions/workflow/status/quixaq/qfetch/build.yml)](https://github.com/quixaq/qfetch/actions)
+[![Version](https://img.shields.io/crates/v/qfetch-cli)](https://crates.io/crates/qfetch-cli)
+[![Crates.io Downloads](https://img.shields.io/crates/d/qfetch-cli)](https://crates.io/crates/qfetch-cli)
+[![License](https://img.shields.io/github/license/quixaq/qfetch)](https://github.com/quixaq/qfetch/LICENSE)
+
 ![Preview](assets/preview.png)
 
 ## Installation
