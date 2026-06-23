@@ -1,6 +1,8 @@
 # qfetch
 A blazing fast, highly configurable and lightweight fetch tool written in Rust.
 
+![Preview](assets/preview.png)
+
 ## Installation
 ### cargo
 ```bash
