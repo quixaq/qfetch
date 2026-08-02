@@ -9,10 +9,6 @@ A blazing fast, highly configurable and lightweight fetch tool written in Rust.
 ![Preview](assets/preview.png)
 
 ## Installation
-### cargo
-```bash
-CONFIG_FILE_PATH=/path/to/file cargo install qfetch-cli
-```
 ### Manual Build
 ```bash
 cargo build --release
@@ -22,7 +18,7 @@ You can optionally use CONFIG_FILE_PATH=/path/to/file before the build command i
 ### NixOS
 Add qfetch to your nix flake inputs
 ```nix
-inputs.qfetch.url = "github:quixaq/qfetch";
+inputs.qfetch.url = "git+https://codeberg.org/quixaq/qfetch";
 ```
 Add the module to nixosSystem
 ```nix
