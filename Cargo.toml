@@ -2,7 +2,7 @@
 name = "qfetch-cli"
 description = "A blazing fast, highly configurable and lightweight fetch tool written in Rust."
 license = "GPL-3.0-or-later"
-repository = "https://github.com/quixaq/qfetch"
+repository = "https://codeberg.org/quixaq/qfetch"
 readme = "README.md"
 keywords = ["cli", "fetch", "system", "linux", "system-info"]
 categories = ["command-line-utilities"]
