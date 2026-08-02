@@ -71,7 +71,7 @@ Benchmark 1: qfetch
   Range (min … max):     1.3 ms …   2.0 ms    2200 runs
 ```
 
-fastfetch will the same modules enabled:
+fastfetch with the same modules enabled:
 ```bash
 > hyperfine -N --warmup 2500 fastfetch
 Benchmark 1: fastfetch
