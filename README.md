@@ -31,11 +31,9 @@ outputs = { nixpkgs, qfetch, ... }: {
 ### General
 Remember to use full hex codes in colors since expanding them is not implemented.
 For `logo.include`, the first logo will be used as fallback, also remember that every logo you include will be directly included in the binary so it may increase execution time. You can see the available logos in the `logo` dir.
-### cargo
-Get the default `config.yaml` file from the repository and make changes there and point the CONFIG_FILE_PATH env variable to it.
-The modules are ordered in the way you order them in the config.
 ### Manual Build
 Modify the `config.yaml` file in the project dir and rebuild.
+As an alternative you could get the default `config.yaml` file from the repository and copy it anywhere else and make changes there and point the CONFIG_FILE_PATH env variable to it.
 The modules are ordered in the way you order them in the config.
 ### NixOS
 You can config directly in your `configuration.nix`.
@@ -45,9 +43,10 @@ Example config:
 ```nix
 qfetch.settings = {
   modules = {
-    os = { enabled = true; key = "Distro"; }
+    os = { enabled = true; key = "Distro"; index = 2; }
     kernel.enabled = false;
     gpu.key = "Graphics";
+    gpu.index = 3.14;
   };
   
   colors = {
