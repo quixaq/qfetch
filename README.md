@@ -67,14 +67,14 @@ qfetch with all modules enabled:
 ```bash
 > hyperfine -N --warmup 2500 qfetch
 Benchmark 1: qfetch
-  Time (mean ± σ):       1.5 ms ±   0.1 ms    [User: 1.0 ms, System: 0.4 ms]
-  Range (min … max):     1.3 ms …   2.0 ms    2200 runs
+  Time (mean ± σ):       1.6 ms ±   0.1 ms    [User: 1.3 ms, System: 0.3 ms]
+  Range (min … max):     1.4 ms …   2.2 ms    2176 runs
 ```
 
 fastfetch with the same modules enabled:
 ```bash
 > hyperfine -N --warmup 2500 fastfetch
 Benchmark 1: fastfetch
-  Time (mean ± σ):      48.4 ms ±   0.8 ms    [User: 23.7 ms, System: 24.3 ms]
-  Range (min … max):    47.6 ms …  51.6 ms    62 runs
+  Time (mean ± σ):       8.1 ms ±   0.3 ms    [User: 2.3 ms, System: 5.5 ms]
+  Range (min … max):     7.5 ms …   9.3 ms    362 runs
 ```
