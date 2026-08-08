@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- *     qfetch v0.2.0
+ *     qfetch v0.2.1
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,11 +40,6 @@ fn main() {
         (None, None)
     };
     let host = if HOST_ENABLED { sysinfo::host() } else { None };
-    let uptime = if UPTIME_ENABLED {
-        sysinfo::uptime()
-    } else {
-        None
-    };
     let shell = if SHELL_ENABLED {
         sysinfo::shell()
     } else {
@@ -68,14 +63,15 @@ fn main() {
     };
     let cpu = if CPU_ENABLED { sysinfo::cpu() } else { None };
     let gpu = if GPU_ENABLED { sysinfo::gpu() } else { None };
-    let (ram, swap) = if RAM_ENABLED || SWAP_ENABLED {
-        let (r, s) = sysinfo::memory();
+    let (uptime, ram, swap) = if SWAP_ENABLED || RAM_ENABLED || SWAP_ENABLED {
+        let (u, r, s) = sysinfo::sysinfo();
         (
+            if UPTIME_ENABLED { u } else { None },
             if RAM_ENABLED { r } else { None },
             if SWAP_ENABLED { s } else { None },
         )
     } else {
-        (None, None)
+        (None, None, None)
     };
     let mounts = if MOUNTS_ENABLED {
         sysinfo::mounts()

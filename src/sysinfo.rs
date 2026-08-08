@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Quixaq
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use nix::sys::statvfs;
+use nix::sys::{statvfs, sysinfo};
 use size::Size;
 use std::fmt::Write;
 use std::fs::{self, File};
@@ -64,37 +64,6 @@ pub fn host() -> Option<String> {
     Some(product.to_owned())
 }
 
-pub fn uptime() -> Option<String> {
-    let content = fs::read_to_string("/proc/uptime").ok()?;
-    let seconds_str = content.split_whitespace().next()?.split('.').next()?;
-    let seconds = seconds_str.parse::<u64>().ok()?;
-    let days = seconds / 86400;
-    let hours = (seconds % 86400) / 3600;
-    let minutes = (seconds % 3600) / 60;
-
-    let mut out = String::with_capacity(32);
-
-    if days > 0 {
-        let _ = write!(out, "{} day{}, ", days, if days == 1 { "" } else { "s" });
-    }
-    if hours > 0 {
-        let _ = write!(out, "{} hour{}, ", hours, if hours == 1 { "" } else { "s" });
-    }
-    if minutes > 0 || out.is_empty() {
-        let _ = write!(
-            out,
-            "{} min{}, ",
-            minutes,
-            if minutes == 1 { "" } else { "s" }
-        );
-    }
-    if out.ends_with(", ") {
-        out.truncate(out.len() - 2);
-    }
-
-    Some(out)
-}
-
 pub fn shell() -> Option<String> {
     std::env::var("SHELL").ok().and_then(|path| {
         Path::new(&path)
@@ -145,54 +114,52 @@ pub fn cpu() -> Option<String> {
     None
 }
 
-fn parse_kb(line: &str) -> u64 {
-    line.split_whitespace()
-        .nth(1)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(0)
-}
+pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
+    match sysinfo::sysinfo() {
+        Ok(info) => {
+            let seconds = info.uptime().as_secs();
+            let days = seconds / 86400;
+            let hours = (seconds % 86400) / 3600;
+            let minutes = (seconds % 3600) / 60;
 
-pub fn memory() -> (Option<String>, Option<String>) {
-    let Ok(file) = File::open("/proc/meminfo") else {
-        return (None, None);
-    };
-    let reader = BufReader::new(file);
+            let mut out = String::with_capacity(32);
 
-    let mut total = 0;
-    let mut available = 0;
-    let mut total_swap = 0;
-    let mut free_swap = 0;
+            if days > 0 {
+                let _ = write!(out, "{} day{}, ", days, if days == 1 { "" } else { "s" });
+            }
+            if hours > 0 {
+                let _ = write!(out, "{} hour{}, ", hours, if hours == 1 { "" } else { "s" });
+            }
+            if minutes > 0 || out.is_empty() {
+                let _ = write!(
+                    out,
+                    "{} min{}, ",
+                    minutes,
+                    if minutes == 1 { "" } else { "s" }
+                );
+            }
+            if out.ends_with(", ") {
+                out.truncate(out.len() - 2);
+            }
 
-    let mut found: usize = 0;
+            let total = info.ram_total();
+            let available = info.ram_unused();
+            let total_swap = info.swap_total();
+            let free_swap = info.swap_free();
 
-    for line in reader.lines().map_while(Result::ok) {
-        if line.starts_with("MemTotal:") {
-            total = parse_kb(&line);
-            found += 1;
-        } else if line.starts_with("MemAvailable:") {
-            available = parse_kb(&line);
-            found += 1;
-        } else if line.starts_with("SwapTotal:") {
-            total_swap = parse_kb(&line);
-            found += 1;
-        } else if line.starts_with("SwapFree:") {
-            free_swap = parse_kb(&line);
-            found += 1;
+            let used = Size::from_bytes(total - available);
+            let total_gib = Size::from_bytes(total);
+            let used_swap = Size::from_bytes(total_swap - free_swap);
+            let total_swap_gib = Size::from_bytes(total_swap);
+
+            (
+                Some(out),
+                Some(format!("{} / {}", used, total_gib)),
+                Some(format!("{} / {}", used_swap, total_swap_gib)),
+            )
         }
-        if found == 4 {
-            break;
-        }
+        Err(_) => (None, None, None),
     }
-
-    let used = Size::from_kibibytes(total - available);
-    let total_gib = Size::from_kibibytes(total);
-    let used_swap = Size::from_kibibytes(total_swap - free_swap);
-    let total_swap_gib = Size::from_kibibytes(total_swap);
-
-    (
-        Some(format!("{} / {}", used, total_gib)),
-        Some(format!("{} / {}", used_swap, total_swap_gib)),
-    )
 }
 
 pub fn gpu() -> Option<String> {
