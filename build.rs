@@ -55,6 +55,10 @@ fn main() {
     let keys_r = u32::from_str_radix(&keys[1..3], 16).expect("Invalid keys hex color.");
     let keys_g = u32::from_str_radix(&keys[3..5], 16).expect("Invalid keys hex color.");
     let keys_b = u32::from_str_radix(&keys[5..7], 16).expect("Invalid keys hex color.");
+    constants.push(format!(
+        "pub const KEYS_COLOR: &'static str = \"{}\";",
+        format!("\\x1b[38;2;{keys_r};{keys_g};{keys_b};m")
+    ));
 
     let separator = config.colors.separator;
     let separator_r =
@@ -63,6 +67,10 @@ fn main() {
         u32::from_str_radix(&separator[3..5], 16).expect("Invalid separator hex color.");
     let separator_b =
         u32::from_str_radix(&separator[5..7], 16).expect("Invalid separator hex color.");
+    constants.push(format!(
+        "pub const SEPARATOR_COLOR: &'static str = \"{}\";",
+        format!("\\x1b[38;2;{separator_r};{separator_g};{separator_b};m")
+    ));
 
     for (index, module) in config.modules.general.iter().enumerate() {
         if module.id != "standard_palette" && module.id != "bright_palette" && module.id != "title"
@@ -79,11 +87,12 @@ fn main() {
             module.enabled
         ));
         let mut key = module.key.clone();
-        if !key.is_empty() {
+        if !key.is_empty() && module.id != "mounts" {
             key = format!(
                 "\\x1b[38;2;{keys_r};{keys_g};{keys_b};m{key}\\x1b[38;2;{separator_r};{separator_g};{separator_b};m:\\x1b[0m "
             )
         }
+
         constants.push(format!(
             "pub const {}_KEY: &'static str = \"{}\";",
             module.id.to_uppercase(),

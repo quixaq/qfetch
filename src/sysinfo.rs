@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Quixaq
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use nix::sys::statvfs;
 use size::Size;
 use std::fmt::Write;
 use std::fs::{self, File};
@@ -9,7 +10,7 @@ use std::path::Path;
 
 use gethostname::gethostname;
 
-use crate::TITLE_COLOR;
+use crate::{KEYS_COLOR, MOUNTS_KEY, SEPARATOR_COLOR, TITLE_COLOR, VALUES_COLOR};
 
 pub fn title() -> (Option<String>, Option<String>) {
     let Ok(user) = std::env::var("USER").or_else(|_| std::env::var("LOGNAME")) else {
@@ -202,4 +203,66 @@ pub fn locale() -> Option<String> {
     std::env::var("LC_ALL")
         .or_else(|_| std::env::var("LANG"))
         .ok()
+}
+
+pub fn mounts() -> Option<String> {
+    let Ok(file) = File::open("/proc/mounts") else {
+        return None;
+    };
+    let reader = BufReader::new(file);
+    let mut seen_sources = std::collections::HashSet::new();
+    let mounts: Vec<String> = reader
+        .lines()
+        .filter_map(Result::ok)
+        .map(|line| {
+            let mut parts = line.split_whitespace();
+            let source = parts.next().unwrap_or("").to_string();
+            let path = parts.next().unwrap_or("").to_string();
+            let fs = parts.next().unwrap_or("").to_string();
+            (source, path, fs)
+        })
+        .filter(|(source, path, fs)| {
+            let allowed_fs = matches!(
+                fs.as_str(),
+                "ext4"
+                    | "ext3"
+                    | "ext2"
+                    | "xfs"
+                    | "btrfs"
+                    | "f2fs"
+                    | "zfs"
+                    | "ntfs"
+                    | "vfat"
+                    | "exfat"
+                    | "etx4"
+            );
+
+            let allowed_source = source.starts_with("/dev/")
+                && !source.starts_with("/loop")
+                && !source.starts_with("/dev/loop")
+                && source != "/dev/mapper/control";
+
+            let allowed_path =
+                !(path.starts_with("/boot") || path == "/var/lib/containers/storage/overlay");
+
+            let unique_source = seen_sources.insert(source.clone());
+
+            allowed_fs && allowed_source && allowed_path && unique_source
+        })
+        .map(|(_, path, _)| path)
+        .collect();
+
+    let mut out: String = "".to_string();
+    for mount in mounts {
+        let Ok(stats) = statvfs::statvfs(mount.as_str()) else {
+            continue;
+        };
+        let block_size = stats.fragment_size() as u64;
+        let total = stats.blocks() * block_size;
+        let used = (stats.blocks() - stats.blocks_free()) * block_size;
+        let full = used * 100 / total;
+        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {} / {} (\x1b[0m{}%{VALUES_COLOR})\n", Size::from_bytes(used), Size::from_bytes(total), full));
+    }
+
+    Some(out).filter(|s| !s.is_empty())
 }

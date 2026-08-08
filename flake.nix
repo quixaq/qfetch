@@ -102,8 +102,13 @@
               enabled = true;
               key = "Swap";
             };
-            locale = {
+            mounts = {
               index = 14;
+              enabled = true;
+              key = "Disk";
+            };
+            locale = {
+              index = 15;
               enabled = true;
               key = "Locale";
             };
@@ -157,7 +162,7 @@
         in
         pkgs.rustPlatform.buildRustPackage {
           pname = "qfetch";
-          version = "0.1.12";
+          version = "0.2.0";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
           postPatch = "cp ${configFile} config.yaml";

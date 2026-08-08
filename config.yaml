@@ -39,6 +39,9 @@ modules:
     - id: swap
       enabled: true
       key: Swap
+    - id: mounts
+      enabled: true
+      key: Disk
     - id: locale
       enabled: true
       key: Locale

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- *     qfetch v0.1.12
+ *     qfetch v0.2.0
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -68,11 +68,6 @@ fn main() {
     };
     let cpu = if CPU_ENABLED { sysinfo::cpu() } else { None };
     let gpu = if GPU_ENABLED { sysinfo::gpu() } else { None };
-    let locale = if LOCALE_ENABLED {
-        sysinfo::locale()
-    } else {
-        None
-    };
     let (ram, swap) = if RAM_ENABLED || SWAP_ENABLED {
         let (r, s) = sysinfo::memory();
         (
@@ -82,8 +77,18 @@ fn main() {
     } else {
         (None, None)
     };
+    let mounts = if MOUNTS_ENABLED {
+        sysinfo::mounts()
+    } else {
+        None
+    };
+    let locale = if LOCALE_ENABLED {
+        sysinfo::locale()
+    } else {
+        None
+    };
     let palette_sep = if STANDARD_PALETTE_ENABLED || BRIGHT_PALETTE_ENABLED {
-        Some("".to_string())
+        Some("\n".to_string())
     } else {
         None
     };
@@ -110,9 +115,10 @@ fn main() {
         (CURSOR_PRIORITY, CURSOR_KEY, cursor),
         (CPU_PRIORITY, CPU_KEY, cpu),
         (GPU_PRIORITY, GPU_KEY, gpu),
-        (LOCALE_PRIORITY, LOCALE_KEY, locale),
         (RAM_PRIORITY, RAM_KEY, ram),
         (SWAP_PRIORITY, SWAP_KEY, swap),
+        (MOUNTS_PRIORITY, "", mounts),
+        (LOCALE_PRIORITY, LOCALE_KEY, locale),
         (253, "", palette_sep),
         (254, STANDARD_PALETTE_KEY, standard_palette),
         (255, BRIGHT_PALETTE_KEY, bright_palette),
@@ -127,39 +133,47 @@ fn main() {
         );
     }
     let logo_lines: Vec<&str> = logo.lines().collect();
+    let logo_line_fallback = logo
+        .lines()
+        .next()
+        .map_or("".to_string(), |line| " ".repeat(measure_text_width(line)));
     let terminal_width = terminal_size()
         .map(|(Width(w), _)| w as usize)
         .unwrap_or(usize::MAX);
-    let mut line = 0;
+    let mut line_i = 0;
     for (_, name, value) in info {
         if let Some(val) = value {
-            let out_line = format!(
-                "{}{}{}{}\x1b[0m",
-                logo_lines.get(line).unwrap_or(&""),
-                name,
-                VALUES_COLOR,
-                val
-            );
-            let display_line = if measure_text_width(&out_line) > terminal_width {
-                let content = truncate_str(&out_line, terminal_width - 1, "");
-                format!("{}\x1b[49;2m…\x1b[0m", content)
-            } else {
-                out_line
-            };
-            let _ = writeln!(out, "{}", display_line).expect("Failed to print output");
-            line += 1;
+            for line in val.lines() {
+                let out_line = format!(
+                    "{}{}{}{}\x1b[0m",
+                    logo_lines
+                        .get(line_i)
+                        .unwrap_or(&logo_line_fallback.as_str()),
+                    name,
+                    VALUES_COLOR,
+                    line
+                );
+                let display_line = if measure_text_width(&out_line) > terminal_width {
+                    let content = truncate_str(&out_line, terminal_width - 1, "");
+                    format!("{}\x1b[49;2m…\x1b[0m", content)
+                } else {
+                    out_line
+                };
+                let _ = writeln!(out, "{}", display_line).expect("Failed to print output");
+                line_i += 1;
+            }
         }
     }
-    if line <= logo_lines.len() {
-        for _ in line..logo_lines.len() {
-            let display_line = if measure_text_width(logo_lines[line]) > terminal_width {
-                let content = truncate_str(logo_lines[line], terminal_width - 1, "");
+    if line_i <= logo_lines.len() {
+        for _ in line_i..logo_lines.len() {
+            let display_line = if measure_text_width(logo_lines[line_i]) > terminal_width {
+                let content = truncate_str(logo_lines[line_i], terminal_width - 1, "");
                 format!("{}\x1b[49;2m…\x1b[0m", content)
             } else {
-                logo_lines[line].to_string()
+                logo_lines[line_i].to_string()
             };
             let _ = writeln!(out, "{}", display_line).expect("Failed to print output");
-            line += 1;
+            line_i += 1;
         }
     }
     print!("{}", out);
