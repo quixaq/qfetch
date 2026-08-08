@@ -250,12 +250,13 @@ dependencies = [
 
 [[package]]
 name = "qfetch-cli"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "console",
  "getgpuname",
  "gethostname",
  "nix",
+ "raw-cpuid",
  "serde",
  "serde_yaml",
  "size",
@@ -285,6 +286,15 @@ name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
+
+[[package]]
+name = "raw-cpuid"
+version = "11.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "498cd0dc59d73224351ee52a95fee0f1a617a2eae0e7d9d720cc622c73a54186"
+dependencies = [
+ "bitflags",
+]
 
 [[package]]
 name = "rustix"

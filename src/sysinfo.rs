@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use nix::sys::{statvfs, sysinfo};
+#[cfg(target_arch = "x86_64")]
+use raw_cpuid::CpuId;
 use size::Size;
 use std::fmt::Write;
 use std::fs::{self, File};
@@ -101,17 +103,29 @@ pub fn cursor() -> Option<String> {
 }
 
 pub fn cpu() -> Option<String> {
-    let file = std::fs::File::open("/proc/cpuinfo").ok()?;
-    let reader = std::io::BufReader::new(file);
+    #[cfg(target_arch = "x86_64")]
+    {
+        let cpuid = CpuId::new();
 
-    for line in reader.lines().map_while(Result::ok) {
-        if line.starts_with("model name") {
-            return line
-                .split_once(':')
-                .map(|(_, name)| name.trim().to_string());
-        }
+        cpuid
+            .get_processor_brand_string()
+            .map(|brand| brand.as_str().to_string())
     }
-    None
+
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let file = std::fs::File::open("/proc/cpuinfo").ok()?;
+        let reader = std::io::BufReader::new(file);
+
+        for line in reader.lines().map_while(Result::ok) {
+            if line.starts_with("model name") {
+                return line
+                    .split_once(':')
+                    .map(|(_, name)| name.trim().to_string());
+            }
+        }
+        None
+    }
 }
 
 pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
