@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Quixaq
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use nix::sys::{statvfs, sysinfo};
+use nix::sys::{statvfs, sysinfo, utsname::uname};
 #[cfg(target_arch = "x86_64")]
 use raw_cpuid::CpuId;
 use size::Size;
@@ -55,9 +55,12 @@ pub fn distro() -> (Option<String>, Option<String>, Option<String>) {
 }
 
 pub fn kernel() -> Option<String> {
-    let mut content = fs::read_to_string("/proc/sys/kernel/osrelease").ok()?;
-    content.truncate(content.trim_end().len());
-    Some(format!("Linux {content}"))
+    let uts = uname().ok()?;
+    Some(format!(
+        "{} {}",
+        uts.sysname().to_str()?,
+        uts.release().to_str()?
+    ))
 }
 
 pub fn host() -> Option<String> {
