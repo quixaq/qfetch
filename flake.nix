@@ -154,6 +154,7 @@
                 keys = "#b19cd9";
                 separator = "#ff6961";
                 values = "#eec1cb";
+                mountpoints = "#eec1cb";
                 low = "a92";
                 medium = "a93";
                 high = "a91";

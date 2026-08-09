@@ -48,6 +48,7 @@ struct Colors {
     keys: String,
     separator: String,
     values: String,
+    mountpoints: String,
     low: String,
     medium: String,
     high: String,
@@ -212,6 +213,12 @@ fn main() {
     constants.push(format!(
         "pub const TITLE_COLOR: &'static str = \"{}\";",
         title
+    ));
+
+    let mountpoint_color = parse_x1b(config.colors.mountpoints);
+    constants.push(format!(
+        "pub const MOUNTSPOINT_COLOR: &'static str = \"{}\";",
+        mountpoint_color
     ));
 
     let low = parse_x1b(config.colors.low);

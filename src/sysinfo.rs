@@ -14,7 +14,8 @@ use gethostname::gethostname;
 
 use crate::{
     HIGH_COLOR, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM,
-    RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, VALUES_COLOR,
+    MOUNTSPOINT_COLOR, RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR,
+    VALUES_COLOR,
 };
 
 pub fn title() -> (Option<String>, Option<String>) {
@@ -271,7 +272,7 @@ pub fn mounts() -> Option<String> {
         let total = stats.blocks() * block_size;
         let used = (stats.blocks() - stats.blocks_free()) * block_size;
         let full: usize = (used * 100 / total) as usize;
-        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {:.2} / {:.2} ({}{}%{VALUES_COLOR}) - {fs}\n", SizeFormatter::new(used, BINARY), SizeFormatter::new(total, BINARY), { if full < MOUNTS_MEDIUM { LOW_COLOR } else if full < MOUNTS_HIGH { MEDIUM_COLOR } else { HIGH_COLOR } },full));
+        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} ({MOUNTSPOINT_COLOR}{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {:.2} / {:.2} ({}{}%{VALUES_COLOR}) - {fs}\n", SizeFormatter::new(used, BINARY), SizeFormatter::new(total, BINARY), { if full < MOUNTS_MEDIUM { LOW_COLOR } else if full < MOUNTS_HIGH { MEDIUM_COLOR } else { HIGH_COLOR } },full));
     }
 
     Some(out).filter(|s| !s.is_empty())
