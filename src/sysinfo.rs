@@ -12,7 +12,10 @@ use std::path::Path;
 
 use gethostname::gethostname;
 
-use crate::{KEYS_COLOR, MOUNTS_KEY, SEPARATOR_COLOR, TITLE_COLOR, VALUES_COLOR};
+use crate::{
+    HIGH_COLOR, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM,
+    RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, VALUES_COLOR,
+};
 
 pub fn title() -> (Option<String>, Option<String>) {
     let Ok(user) = std::env::var("USER").or_else(|_| std::env::var("LOGNAME")) else {
@@ -165,21 +168,39 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
             let free_swap = info.swap_free();
             let used = total - available;
             let used_swap = total_swap - free_swap;
-            let used_percent = used * 100 / total;
-            let used_percent_swap = used_swap * 100 / total_swap;
+            let used_percent = (used * 100 / total) as usize;
+            let used_percent_swap = (used_swap * 100 / total_swap) as usize;
 
             (
                 Some(out),
                 Some(format!(
-                    "{:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR})",
+                    "{:.2} / {:.2} ({}{}%{VALUES_COLOR})",
                     SizeFormatter::new(used, BINARY),
                     SizeFormatter::new(total, BINARY),
+                    {
+                        if used_percent < RAM_MEDIUM {
+                            LOW_COLOR
+                        } else if used_percent < RAM_HIGH {
+                            MEDIUM_COLOR
+                        } else {
+                            HIGH_COLOR
+                        }
+                    },
                     used_percent
                 )),
                 Some(format!(
-                    "{:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR})",
+                    "{:.2} / {:.2} ({}{}%{VALUES_COLOR})",
                     SizeFormatter::new(used_swap, BINARY),
                     SizeFormatter::new(total_swap, BINARY),
+                    {
+                        if used_percent_swap < SWAP_MEDIUM {
+                            LOW_COLOR
+                        } else if used_percent_swap < SWAP_HIGH {
+                            MEDIUM_COLOR
+                        } else {
+                            HIGH_COLOR
+                        }
+                    },
                     used_percent_swap
                 )),
             )
@@ -249,8 +270,8 @@ pub fn mounts() -> Option<String> {
         let block_size = stats.fragment_size() as u64;
         let total = stats.blocks() * block_size;
         let used = (stats.blocks() - stats.blocks_free()) * block_size;
-        let full = used * 100 / total;
-        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR}) - {fs}\n", SizeFormatter::new(used, BINARY), SizeFormatter::new(total, BINARY), full));
+        let full: usize = (used * 100 / total) as usize;
+        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {:.2} / {:.2} ({}{}%{VALUES_COLOR}) - {fs}\n", SizeFormatter::new(used, BINARY), SizeFormatter::new(total, BINARY), { if full < MOUNTS_MEDIUM { LOW_COLOR } else if full < MOUNTS_HIGH { MEDIUM_COLOR } else { HIGH_COLOR } },full));
     }
 
     Some(out).filter(|s| !s.is_empty())

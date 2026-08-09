@@ -135,11 +135,28 @@
 
           finalConfig =
             (lib.recursiveUpdate {
+              module_settings = {
+                ram = {
+                  medium = 30;
+                  high = 80;
+                };
+                swap = {
+                  medium = 15;
+                  high = 40;
+                };
+                mounts = {
+                  medium = 20;
+                  high = 80;
+                };
+              };
               colors = {
                 title = "#b19cd9";
                 keys = "#b19cd9";
                 separator = "#ff6961";
                 values = "#eec1cb";
+                low = "a92";
+                medium = "a93";
+                high = "a91";
               };
               logo = {
                 enabled = true;

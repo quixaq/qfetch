@@ -51,11 +51,28 @@ modules:
     - id: bright_palette
       enabled: true
       key: ""
+module_settings:
+  ram:
+    thresholds:
+      medium: 30
+      high: 80
+  swap:
+    thresholds:
+      medium: 15
+      high: 40
+  mounts:
+    thresholds:
+      # low is always 0
+      medium: 20
+      high: 80
 colors:
   title: "#b19cd9"
   keys: "#b19cd9"
   separator: "#ff6961"
   values: "#eec1cb"
+  low: "a92"
+  medium: "a93"
+  high: "a91"
 logo:
   enabled: true
   padding:

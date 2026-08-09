@@ -15,11 +15,42 @@ struct Modules {
 }
 
 #[derive(Deserialize)]
+struct ThresholdSettings {
+    medium: usize,
+    high: usize,
+}
+
+#[derive(Deserialize)]
+struct RamSettings {
+    thresholds: ThresholdSettings,
+}
+
+#[derive(Deserialize)]
+struct SwapSettings {
+    thresholds: ThresholdSettings,
+}
+
+#[derive(Deserialize)]
+struct MountsSettings {
+    thresholds: ThresholdSettings,
+}
+
+#[derive(Deserialize)]
+struct ModuleSettings {
+    ram: RamSettings,
+    swap: SwapSettings,
+    mounts: MountsSettings,
+}
+
+#[derive(Deserialize)]
 struct Colors {
     title: String,
     keys: String,
     separator: String,
     values: String,
+    low: String,
+    medium: String,
+    high: String,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +77,7 @@ struct Logo {
 #[derive(Deserialize)]
 struct Config {
     modules: Modules,
+    module_settings: ModuleSettings,
     colors: Colors,
     logo: Logo,
 }
@@ -180,6 +212,87 @@ fn main() {
     constants.push(format!(
         "pub const TITLE_COLOR: &'static str = \"{}\";",
         title
+    ));
+
+    let low = parse_x1b(config.colors.low);
+    constants.push(format!("pub const LOW_COLOR: &'static str = \"{}\";", low));
+
+    let medium = parse_x1b(config.colors.medium);
+    constants.push(format!(
+        "pub const MEDIUM_COLOR: &'static str = \"{}\";",
+        medium
+    ));
+
+    let high = parse_x1b(config.colors.high);
+    constants.push(format!(
+        "pub const HIGH_COLOR: &'static str = \"{}\";",
+        high
+    ));
+
+    let ram_medium_threshold = config.module_settings.ram.thresholds.medium;
+    let ram_high_threshold = config.module_settings.ram.thresholds.high;
+    if ram_medium_threshold > 100 {
+        panic!("ram medium threshold is higher than 100%")
+    }
+    if ram_high_threshold > 100 {
+        panic!("ram high threshold is higher than 100%")
+    }
+    if ram_medium_threshold > ram_high_threshold {
+        panic!(
+            "ram medium threshold is higher than mounts high threshold, consider changing the colors instead"
+        )
+    }
+    constants.push(format!(
+        "pub const RAM_MEDIUM: usize = {};",
+        ram_medium_threshold
+    ));
+    constants.push(format!(
+        "pub const RAM_HIGH: usize = {};",
+        ram_high_threshold
+    ));
+
+    let swap_medium_threshold = config.module_settings.swap.thresholds.medium;
+    let swap_high_threshold = config.module_settings.swap.thresholds.high;
+    if swap_medium_threshold > 100 {
+        panic!("swap medium threshold is higher than 100%")
+    }
+    if swap_high_threshold > 100 {
+        panic!("swap high threshold is higher than 100%")
+    }
+    if swap_medium_threshold > swap_high_threshold {
+        panic!(
+            "swap medium threshold is higher than mounts high threshold, consider changing the colors instead"
+        )
+    }
+    constants.push(format!(
+        "pub const SWAP_MEDIUM: usize = {};",
+        swap_medium_threshold
+    ));
+    constants.push(format!(
+        "pub const SWAP_HIGH: usize = {};",
+        swap_high_threshold
+    ));
+
+    let mounts_medium_threshold = config.module_settings.mounts.thresholds.medium;
+    let mounts_high_threshold = config.module_settings.mounts.thresholds.high;
+    if mounts_medium_threshold > 100 {
+        panic!("mounts medium threshold is higher than 100%")
+    }
+    if mounts_high_threshold > 100 {
+        panic!("mounts high threshold is higher than 100%")
+    }
+    if mounts_medium_threshold > mounts_high_threshold {
+        panic!(
+            "mounts medium threshold is higher than mounts high threshold, consider changing the colors instead"
+        )
+    }
+    constants.push(format!(
+        "pub const MOUNTS_MEDIUM: usize = {};",
+        mounts_medium_threshold
+    ));
+    constants.push(format!(
+        "pub const MOUNTS_HIGH: usize = {};",
+        mounts_high_threshold
     ));
 
     let logo_enabled = config.logo.enabled;
