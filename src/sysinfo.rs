@@ -218,7 +218,6 @@ pub fn mounts() -> Option<String> {
                     | "ntfs"
                     | "vfat"
                     | "exfat"
-                    | "etx4"
             );
 
             let allowed_source = source.starts_with("/dev/") && !source.starts_with("/loop");
