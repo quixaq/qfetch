@@ -41,6 +41,47 @@ struct Config {
     logo: Logo,
 }
 
+fn parse_x1b(s: String) -> String {
+    if s.starts_with("#") {
+        if s.len() == 9 {
+            if &s[7..9].to_lowercase() != "ff" {
+                panic!("transparency is not supported: {}", s)
+            }
+        }
+        let r = match s.len() {
+            4 => {
+                usize::from_str_radix(&s[1..2].repeat(2), 16).expect(&format!("invalid hex: {}", s))
+            }
+            7 | 9 => usize::from_str_radix(&s[1..3], 16).expect(&format!("invalid hex: {}", s)),
+            _ => panic!("invalid hex: {}", s),
+        };
+        let g = match s.len() {
+            4 => {
+                usize::from_str_radix(&s[2..3].repeat(2), 16).expect(&format!("invalid hex: {}", s))
+            }
+            7 | 9 => usize::from_str_radix(&s[3..5], 16).expect(&format!("invalid hex: {}", s)),
+            _ => panic!("invalid hex: {}", s),
+        };
+        let b = match s.len() {
+            4 => {
+                usize::from_str_radix(&s[3..4].repeat(2), 16).expect(&format!("invalid hex: {}", s))
+            }
+            7 | 9 => usize::from_str_radix(&s[5..7], 16).expect(&format!("invalid hex: {}", s)),
+            _ => panic!("invalid hex: {}", s),
+        };
+        return format!("\x1b[38;2;{r};{g};{b};m");
+    } else if s.starts_with("a") {
+        let color =
+            usize::from_str_radix(&s[1..3], 10).expect(&format!("invalid ansi color: {}", s));
+        if color < 30 || color > 97 || (color > 37 && color < 90) {
+            panic!("invalid ansi color: {}", s);
+        };
+        return format!("\x1b[{}m", color);
+    } else {
+        panic!("invalid color: {}", s)
+    }
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=config.yaml");
     println!("cargo:rerun-if-env-changed=CONFIG_FILE_PATH");
@@ -51,25 +92,16 @@ fn main() {
 
     let mut constants: Vec<String> = Vec::new();
 
-    let keys = config.colors.keys;
-    let keys_r = u32::from_str_radix(&keys[1..3], 16).expect("Invalid keys hex color.");
-    let keys_g = u32::from_str_radix(&keys[3..5], 16).expect("Invalid keys hex color.");
-    let keys_b = u32::from_str_radix(&keys[5..7], 16).expect("Invalid keys hex color.");
+    let keys = parse_x1b(config.colors.keys);
     constants.push(format!(
         "pub const KEYS_COLOR: &'static str = \"{}\";",
-        format!("\\x1b[38;2;{keys_r};{keys_g};{keys_b};m")
+        keys
     ));
 
-    let separator = config.colors.separator;
-    let separator_r =
-        u32::from_str_radix(&separator[1..3], 16).expect("Invalid separator hex color.");
-    let separator_g =
-        u32::from_str_radix(&separator[3..5], 16).expect("Invalid separator hex color.");
-    let separator_b =
-        u32::from_str_radix(&separator[5..7], 16).expect("Invalid separator hex color.");
+    let separator = parse_x1b(config.colors.separator);
     constants.push(format!(
         "pub const SEPARATOR_COLOR: &'static str = \"{}\";",
-        format!("\\x1b[38;2;{separator_r};{separator_g};{separator_b};m")
+        separator
     ));
 
     let mut info: Vec<(usize, String, String)> = Vec::new();
@@ -101,9 +133,7 @@ fn main() {
 
         let mut key = module.key.clone();
         if !key.is_empty() && module.id != "mounts" {
-            key = format!(
-                "\\x1b[38;2;{keys_r};{keys_g};{keys_b};m{key}\\x1b[38;2;{separator_r};{separator_g};{separator_b};m:\\x1b[0m ",
-            )
+            key = format!("{}{key}{}:\\x1b[0m ", keys, separator)
         }
 
         match module.id.as_str() {
@@ -131,22 +161,16 @@ fn main() {
 
     info.push((253, "".to_owned(), "palette_sep".to_owned()));
 
-    let values = config.colors.values;
-    let values_r = u32::from_str_radix(&values[1..3], 16).expect("Invalid values hex color.");
-    let values_g = u32::from_str_radix(&values[3..5], 16).expect("Invalid values hex color.");
-    let values_b = u32::from_str_radix(&values[5..7], 16).expect("Invalid values hex color.");
+    let values = parse_x1b(config.colors.values);
     constants.push(format!(
         "pub const VALUES_COLOR: &'static str = \"{}\";",
-        format!("\\x1b[38;2;{values_r};{values_g};{values_b};m")
+        values
     ));
 
-    let title = config.colors.title;
-    let title_r = u32::from_str_radix(&title[1..3], 16).expect("Invalid values hex color.");
-    let title_g = u32::from_str_radix(&title[3..5], 16).expect("Invalid values hex color.");
-    let title_b = u32::from_str_radix(&title[5..7], 16).expect("Invalid values hex color.");
+    let title = parse_x1b(config.colors.title);
     constants.push(format!(
         "pub const TITLE_COLOR: &'static str = \"{}\";",
-        format!("\\x1b[38;2;{title_r};{title_g};{title_b};m")
+        title
     ));
 
     let logo_enabled = config.logo.enabled;
@@ -168,14 +192,7 @@ fn main() {
                         let digit_char = iter.next().unwrap();
                         let digit = digit_char.to_digit(10).unwrap() as usize;
                         if let Some(color) = colors.get(digit.saturating_sub(1)) {
-                            let color_r = u32::from_str_radix(&color[1..3], 16)
-                                .expect("Invalid values hex color.");
-                            let color_g = u32::from_str_radix(&color[3..5], 16)
-                                .expect("Invalid values hex color.");
-                            let color_b = u32::from_str_radix(&color[5..7], 16)
-                                .expect("Invalid values hex color.");
-                            let color_ansi = format!("\x1b[38;2;{color_r};{color_g};{color_b};m");
-                            out.push_str(&color_ansi);
+                            out.push_str(&parse_x1b(color.to_owned()));
                             continue;
                         }
                     }
@@ -194,11 +211,7 @@ fn main() {
         for line in lines {
             let width = measure_text_width(line);
             let padding = " ".repeat(target - width);
-            padded_out.push_str(&format!(
-                "{}\x1b[0m{}\\n",
-                line.replace("\x1b", "\\x1b"),
-                padding
-            ));
+            padded_out.push_str(&format!("{}\x1b[0m{}\\n", line, padding));
         }
         logos.push(logo.id.to_string());
         if index == 0 {

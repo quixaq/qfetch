@@ -29,7 +29,7 @@ outputs = { nixpkgs, qfetch, ... }: {
 
 ## Configuration
 ### General
-Remember to use full hex codes in colors since expanding them is not implemented.
+Colors can be set as either a hex color with the # (e.g. "#ffafcb", "#fff"), or an ansi foreground color code prefixed with "a" (e.g. "a31", "a95")
 For `logo.include`, the first logo will be used as fallback, also remember that every logo you include will be directly included in the binary so it may increase execution time. You can see the available logos in the `logo` dir.
 ### Manual Build
 Modify the `config.yaml` file in the project dir and rebuild.
