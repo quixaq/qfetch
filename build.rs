@@ -94,7 +94,10 @@ fn parse_x1b(s: String) -> String {
     if s.starts_with("#") {
         if s.len() == 9 {
             if &s[7..9].to_lowercase() != "ff" {
-                panic!("transparency is not supported: {}", s)
+                {
+                    cargo_build::error(format!("transparency is not supported: {}", s).as_str());
+                    std::process::exit(1)
+                }
             }
         }
         let r = match s.len() {
@@ -102,38 +105,51 @@ fn parse_x1b(s: String) -> String {
                 usize::from_str_radix(&s[1..2].repeat(2), 16).expect(&format!("invalid hex: {}", s))
             }
             7 | 9 => usize::from_str_radix(&s[1..3], 16).expect(&format!("invalid hex: {}", s)),
-            _ => panic!("invalid hex: {}", s),
+            _ => {
+                cargo_build::error(format!("invalid hex: {}", s).as_str());
+                std::process::exit(1)
+            }
         };
         let g = match s.len() {
             4 => {
                 usize::from_str_radix(&s[2..3].repeat(2), 16).expect(&format!("invalid hex: {}", s))
             }
             7 | 9 => usize::from_str_radix(&s[3..5], 16).expect(&format!("invalid hex: {}", s)),
-            _ => panic!("invalid hex: {}", s),
+            _ => {
+                cargo_build::error(format!("invalid hex: {}", s).as_str());
+                std::process::exit(1)
+            }
         };
         let b = match s.len() {
             4 => {
                 usize::from_str_radix(&s[3..4].repeat(2), 16).expect(&format!("invalid hex: {}", s))
             }
             7 | 9 => usize::from_str_radix(&s[5..7], 16).expect(&format!("invalid hex: {}", s)),
-            _ => panic!("invalid hex: {}", s),
+            _ => {
+                cargo_build::error(format!("invalid hex: {}", s).as_str());
+                std::process::exit(1)
+            }
         };
         return format!("\x1b[38;2;{r};{g};{b};m");
     } else if s.starts_with("a") {
         let color =
             usize::from_str_radix(&s[1..3], 10).expect(&format!("invalid ansi color: {}", s));
         if color < 30 || color > 97 || (color > 37 && color < 90) {
-            panic!("invalid ansi color: {}", s);
+            cargo_build::error(format!("invalid ansi color: {}", s).as_str());
+            std::process::exit(1)
         };
         return format!("\x1b[{}m", color);
     } else {
-        panic!("invalid color: {}", s)
+        cargo_build::error(format!("invalid color: {}", s).as_str());
+        std::process::exit(1)
     }
 }
 
 fn main() {
     println!("cargo:rerun-if-changed=config.yaml");
     println!("cargo:rerun-if-env-changed=CONFIG_FILE_PATH");
+
+    color_backtrace::install();
 
     let config_path = env::var("CONFIG_FILE_PATH").unwrap_or_else(|_| "config.yaml".to_string());
     let yaml_str = fs::read_to_string(&config_path).expect("Failed to read config.yaml");

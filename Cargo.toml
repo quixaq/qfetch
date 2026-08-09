@@ -25,6 +25,8 @@ nix = { version = "0.31.3", features = [ "fs", "feature" ] }
 terminal_size = "0.4.4"
 
 [build-dependencies]
+cargo-build = "1.0.0"
+color-backtrace = "0.7.4"
 console = "0.16.2"
 serde = { version = "1.0.228", features = [ "derive" ]}
 serde_yaml = "0.9.34"
