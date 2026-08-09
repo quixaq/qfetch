@@ -30,9 +30,9 @@ const STANDARD_PALETTE: &str = "\x1b[40m   \x1b[41m   \x1b[42m   \x1b[43m   \x1b
 const BRIGHT_PALETTE: &str = "\x1b[100m   \x1b[101m   \x1b[102m   \x1b[103m   \x1b[104m   \x1b[105m   \x1b[106m   \x1b[107m   \x1b[0m";
 
 fn main() {
-    let (mut pretty, id, id_like) = sysinfo::distro();
+    let (mut os, id, id_like) = sysinfo::distro();
     if !OS_ENABLED {
-        pretty = None
+        os = None
     }
     let (title, sep) = if TITLE_ENABLED {
         sysinfo::title()
@@ -98,28 +98,9 @@ fn main() {
     } else {
         None
     };
-    let mut info = [
-        (0, TITLE_KEY, title),
-        (1, TITLE_KEY, sep),
-        (OS_PRIORITY, OS_KEY, pretty),
-        (HOST_PRIORITY, HOST_KEY, host),
-        (UPTIME_PRIORITY, UPTIME_KEY, uptime),
-        (SHELL_PRIORITY, SHELL_KEY, shell),
-        (KERNEL_PRIORITY, KERNEL_KEY, kernel),
-        (DE_PRIORITY, DE_KEY, de),
-        (THEME_PRIORITY, THEME_KEY, theme),
-        (CURSOR_PRIORITY, CURSOR_KEY, cursor),
-        (CPU_PRIORITY, CPU_KEY, cpu),
-        (GPU_PRIORITY, GPU_KEY, gpu),
-        (RAM_PRIORITY, RAM_KEY, ram),
-        (SWAP_PRIORITY, SWAP_KEY, swap),
-        (MOUNTS_PRIORITY, "", mounts),
-        (LOCALE_PRIORITY, LOCALE_KEY, locale),
-        (253, "", palette_sep),
-        (254, STANDARD_PALETTE_KEY, standard_palette),
-        (255, BRIGHT_PALETTE_KEY, bright_palette),
-    ];
-    info.sort_unstable();
+
+    let info = include!(concat!(env!("OUT_DIR"), "/modules.rs"));
+
     let mut out = String::with_capacity(256);
     let mut logo = "";
     if LOGO_ENABLED {
@@ -137,7 +118,7 @@ fn main() {
         .map(|(Width(w), _)| w as usize)
         .unwrap_or(usize::MAX);
     let mut line_i = 0;
-    for (_, name, value) in info {
+    for (name, value) in info {
         if let Some(val) = value {
             for line in val.lines() {
                 let out_line = format!(
