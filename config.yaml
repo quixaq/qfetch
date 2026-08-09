@@ -52,6 +52,8 @@ modules:
       enabled: true
       key: ""
 module_settings:
+  title:
+    separator_char: "-"
   ram:
     thresholds:
       medium: 30
@@ -67,6 +69,7 @@ module_settings:
       high: 80
 colors:
   title: "#b19cd9"
+  title_sep: "a37"
   keys: "#b19cd9"
   separator: "#ff6961"
   values: "#eec1cb"

@@ -15,7 +15,7 @@ use gethostname::gethostname;
 use crate::{
     HIGH_COLOR, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM,
     MOUNTSPOINT_COLOR, RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR,
-    VALUES_COLOR,
+    TITLE_SEP_CHAR, TITLE_SEP_COLOR, VALUES_COLOR,
 };
 
 pub fn title() -> (Option<String>, Option<String>) {
@@ -29,10 +29,10 @@ pub fn title() -> (Option<String>, Option<String>) {
         return (None, None);
     }
     let title = format!("{}@{}", user, hostname);
-    let sep = "-".repeat(title.len());
+    let sep = TITLE_SEP_CHAR.repeat(title.len());
     (
         Some(format!("{}{}", TITLE_COLOR, title)),
-        Some(format!("\x1b[0m{}", sep)),
+        Some(format!("{}{}", TITLE_SEP_COLOR, sep)),
     )
 }
 

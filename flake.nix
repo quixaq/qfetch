@@ -136,6 +136,9 @@
           finalConfig =
             (lib.recursiveUpdate {
               module_settings = {
+                title = {
+                  separator_char = "-";
+                };
                 ram = {
                   medium = 30;
                   high = 80;
@@ -151,6 +154,7 @@
               };
               colors = {
                 title = "#b19cd9";
+                title_sep = "a37";
                 keys = "#b19cd9";
                 separator = "#ff6961";
                 values = "#eec1cb";

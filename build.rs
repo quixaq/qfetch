@@ -15,6 +15,11 @@ struct Modules {
 }
 
 #[derive(Deserialize)]
+struct TitleSettings {
+    separator_char: String,
+}
+
+#[derive(Deserialize)]
 struct ThresholdSettings {
     medium: usize,
     high: usize,
@@ -37,6 +42,7 @@ struct MountsSettings {
 
 #[derive(Deserialize)]
 struct ModuleSettings {
+    title: TitleSettings,
     ram: RamSettings,
     swap: SwapSettings,
     mounts: MountsSettings,
@@ -45,6 +51,7 @@ struct ModuleSettings {
 #[derive(Deserialize)]
 struct Colors {
     title: String,
+    title_sep: String,
     keys: String,
     separator: String,
     values: String,
@@ -215,6 +222,12 @@ fn main() {
         title
     ));
 
+    let title_sep = parse_x1b(config.colors.title_sep);
+    constants.push(format!(
+        "pub const TITLE_SEP_COLOR: &'static str = \"{}\";",
+        title_sep
+    ));
+
     let mountpoint_color = parse_x1b(config.colors.mountpoints);
     constants.push(format!(
         "pub const MOUNTSPOINT_COLOR: &'static str = \"{}\";",
@@ -234,6 +247,11 @@ fn main() {
     constants.push(format!(
         "pub const HIGH_COLOR: &'static str = \"{}\";",
         high
+    ));
+
+    constants.push(format!(
+        "pub const TITLE_SEP_CHAR: &'static str = \"{}\";",
+        config.module_settings.title.separator_char
     ));
 
     let ram_medium_threshold = config.module_settings.ram.thresholds.medium;
