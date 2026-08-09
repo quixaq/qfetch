@@ -146,8 +146,8 @@ fn parse_x1b(s: String) -> String {
 }
 
 fn main() {
-    println!("cargo:rerun-if-changed=config.yaml");
-    println!("cargo:rerun-if-env-changed=CONFIG_FILE_PATH");
+    cargo_build::rerun_if_changed("config.yaml");
+    cargo_build::rerun_if_env_changed("CONFIG_FILE_PATH");
 
     color_backtrace::install();
 
