@@ -221,10 +221,7 @@ pub fn mounts() -> Option<String> {
                     | "etx4"
             );
 
-            let allowed_source = source.starts_with("/dev/")
-                && !source.starts_with("/loop")
-                && !source.starts_with("/dev/loop")
-                && source != "/dev/mapper/control";
+            let allowed_source = source.starts_with("/dev/") && !source.starts_with("/loop");
 
             let allowed_path =
                 !(path.starts_with("/boot") || path == "/var/lib/containers/storage/overlay");
