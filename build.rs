@@ -211,7 +211,7 @@ fn main() {
         for line in lines {
             let width = measure_text_width(line);
             let padding = " ".repeat(target - width);
-            padded_out.push_str(&format!("{}\x1b[0m{}\\n", line, padding));
+            padded_out.push_str(&format!(" {}\x1b[0m{}\\n", line, padding));
         }
         logos.push(logo.id.to_string());
         if index == 0 {
