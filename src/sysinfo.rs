@@ -165,18 +165,22 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
             let free_swap = info.swap_free();
             let used = total - available;
             let used_swap = total_swap - free_swap;
+            let used_percent = used * 100 / total;
+            let used_percent_swap = used_swap * 100 / total_swap;
 
             (
                 Some(out),
                 Some(format!(
-                    "{:.2} / {:.2}",
+                    "{:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR})",
                     SizeFormatter::new(used, BINARY),
-                    SizeFormatter::new(total, BINARY)
+                    SizeFormatter::new(total, BINARY),
+                    used_percent
                 )),
                 Some(format!(
-                    "{:.2} / {:.2}",
+                    "{:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR})",
                     SizeFormatter::new(used_swap, BINARY),
-                    SizeFormatter::new(total_swap, BINARY)
+                    SizeFormatter::new(total_swap, BINARY),
+                    used_percent_swap
                 )),
             )
         }
