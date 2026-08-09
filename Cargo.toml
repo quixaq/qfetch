@@ -13,7 +13,7 @@ edition = "2024"
 name = "qfetch"
 path = "src/main.rs"
 
-[target.'cfg(target_arch = "x86_64")'.dependencies]
+[target.'cfg(any(target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 raw-cpuid = "11.6.0"
 
 [dependencies]

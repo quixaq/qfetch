@@ -3,7 +3,7 @@
 
 use humansize::{BINARY, SizeFormatter};
 use nix::sys::{statvfs, sysinfo, utsname::uname};
-#[cfg(target_arch = "x86_64")]
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use raw_cpuid::CpuId;
 use std::fmt::Write;
 use std::fs::{self, File};
@@ -110,7 +110,7 @@ pub fn cursor() -> Option<String> {
 }
 
 pub fn cpu() -> Option<String> {
-    #[cfg(target_arch = "x86_64")]
+    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
         let cpuid = CpuId::new();
 
