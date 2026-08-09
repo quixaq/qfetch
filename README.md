@@ -55,6 +55,7 @@ qfetch.settings = {
   
   logo = {
     enabled = true;
+    padding.char = "π"
     include = [
       { id = "nixos" colors = [ "#ffafcb" "#123456" ]; }
     ];

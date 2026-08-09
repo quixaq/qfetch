@@ -143,6 +143,12 @@
               };
               logo = {
                 enabled = true;
+                padding = {
+                  left = 1;
+                  right = 4;
+                  char = " ";
+                  replace_spaces_with_char = false;
+                };
                 include = [
                   {
                     id = "nixos";

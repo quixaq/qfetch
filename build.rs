@@ -29,8 +29,17 @@ struct LogoElement {
 }
 
 #[derive(Deserialize)]
+struct Padding {
+    left: usize,
+    right: usize,
+    char: String,
+    replace_spaces_with_char: bool,
+}
+
+#[derive(Deserialize)]
 struct Logo {
     enabled: bool,
+    padding: Padding,
     include: Vec<LogoElement>,
 }
 
@@ -206,12 +215,20 @@ fn main() {
             .map(|line| measure_text_width(line))
             .max()
             .unwrap_or(0)
-            + 4;
+            + config.logo.padding.right;
         let mut padded_out = String::new();
         for line in lines {
             let width = measure_text_width(line);
-            let padding = " ".repeat(target - width);
-            padded_out.push_str(&format!(" {}\x1b[0m{}\\n", line, padding));
+            let padding = config.logo.padding.char.repeat(target - width);
+            padded_out.push_str(&format!(
+                "{}{}\x1b[0m{}\\n",
+                config.logo.padding.char.repeat(config.logo.padding.left),
+                match config.logo.padding.replace_spaces_with_char {
+                    true => line.replace(" ", config.logo.padding.char.as_str()),
+                    false => line.to_string(),
+                },
+                padding
+            ));
         }
         logos.push(logo.id.to_string());
         if index == 0 {
