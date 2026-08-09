@@ -195,7 +195,7 @@ pub fn mounts() -> Option<String> {
     };
     let reader = BufReader::new(file);
     let mut seen_sources = std::collections::HashSet::new();
-    let mounts: Vec<String> = reader
+    let mounts: Vec<(String, String)> = reader
         .lines()
         .filter_map(Result::ok)
         .map(|line| {
@@ -229,11 +229,11 @@ pub fn mounts() -> Option<String> {
 
             allowed_fs && allowed_source && allowed_path && unique_source
         })
-        .map(|(_, path, _)| path)
+        .map(|(_, path, fs)| (fs, path))
         .collect();
 
     let mut out: String = "".to_string();
-    for mount in mounts {
+    for (fs, mount) in mounts {
         let Ok(stats) = statvfs::statvfs(mount.as_str()) else {
             continue;
         };
@@ -241,7 +241,7 @@ pub fn mounts() -> Option<String> {
         let total = stats.blocks() * block_size;
         let used = (stats.blocks() - stats.blocks_free()) * block_size;
         let full = used * 100 / total;
-        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {} / {} (\x1b[0m{}%{VALUES_COLOR})\n", Size::from_bytes(used), Size::from_bytes(total), full));
+        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {} / {} (\x1b[0m{}%{VALUES_COLOR}) - {fs}\n", Size::from_bytes(used), Size::from_bytes(total), full));
     }
 
     Some(out).filter(|s| !s.is_empty())
