@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Quixaq
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+use humansize::{BINARY, SizeFormatter};
 use nix::sys::{statvfs, sysinfo, utsname::uname};
 #[cfg(target_arch = "x86_64")]
 use raw_cpuid::CpuId;
-use size::Size;
 use std::fmt::Write;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
@@ -163,16 +163,21 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
             let available = info.ram_unused();
             let total_swap = info.swap_total();
             let free_swap = info.swap_free();
-
-            let used = Size::from_bytes(total - available);
-            let total_gib = Size::from_bytes(total);
-            let used_swap = Size::from_bytes(total_swap - free_swap);
-            let total_swap_gib = Size::from_bytes(total_swap);
+            let used = total - available;
+            let used_swap = total_swap - free_swap;
 
             (
                 Some(out),
-                Some(format!("{} / {}", used, total_gib)),
-                Some(format!("{} / {}", used_swap, total_swap_gib)),
+                Some(format!(
+                    "{:.2} / {:.2}",
+                    SizeFormatter::new(used, BINARY),
+                    SizeFormatter::new(total, BINARY)
+                )),
+                Some(format!(
+                    "{:.2} / {:.2}",
+                    SizeFormatter::new(used_swap, BINARY),
+                    SizeFormatter::new(total_swap, BINARY)
+                )),
             )
         }
         Err(_) => (None, None, None),
@@ -241,7 +246,7 @@ pub fn mounts() -> Option<String> {
         let total = stats.blocks() * block_size;
         let used = (stats.blocks() - stats.blocks_free()) * block_size;
         let full = used * 100 / total;
-        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {} / {} (\x1b[0m{}%{VALUES_COLOR}) - {fs}\n", Size::from_bytes(used), Size::from_bytes(total), full));
+        out.push_str(&format!("{KEYS_COLOR}{MOUNTS_KEY} (\x1b[0m{mount}{KEYS_COLOR}){SEPARATOR_COLOR}:{VALUES_COLOR} {:.2} / {:.2} (\x1b[0m{}%{VALUES_COLOR}) - {fs}\n", SizeFormatter::new(used, BINARY), SizeFormatter::new(total, BINARY), full));
     }
 
     Some(out).filter(|s| !s.is_empty())
