@@ -140,16 +140,22 @@
                   separator_char = "-";
                 };
                 ram = {
-                  medium = 30;
-                  high = 80;
+                  thresholds = {
+                    medium = 30;
+                    high = 80;
+                  };
                 };
                 swap = {
-                  medium = 15;
-                  high = 40;
+                  thresholds = {
+                    medium = 15;
+                    high = 40;
+                  };
                 };
                 mounts = {
-                  medium = 20;
-                  high = 80;
+                  thresholds = {
+                    medium = 20;
+                    high = 80;
+                  };
                 };
               };
               colors = {
