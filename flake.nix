@@ -197,7 +197,7 @@
         in
         pkgs.rustPlatform.buildRustPackage {
           pname = "qfetch";
-          version = "0.3.1";
+          version = "0.3.2";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
           postPatch = "cp ${configFile} config.yaml";

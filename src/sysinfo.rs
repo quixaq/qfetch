@@ -170,7 +170,26 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
             let used = total - available;
             let used_swap = total_swap - free_swap;
             let used_percent = (used * 100 / total) as usize;
-            let used_percent_swap = (used_swap * 100 / total_swap) as usize;
+            let mut swap = None;
+            if total_swap != 0 {
+                let used_percent_swap = (used_swap * 100 / total_swap) as usize;
+
+                swap = Some(format!(
+                    "{:.2} / {:.2} ({}{}%{VALUES_COLOR})",
+                    SizeFormatter::new(used_swap, BINARY),
+                    SizeFormatter::new(total_swap, BINARY),
+                    {
+                        if used_percent_swap < SWAP_MEDIUM {
+                            LOW_COLOR
+                        } else if used_percent_swap < SWAP_HIGH {
+                            MEDIUM_COLOR
+                        } else {
+                            HIGH_COLOR
+                        }
+                    },
+                    used_percent_swap
+                ));
+            }
 
             (
                 Some(out),
@@ -189,21 +208,7 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
                     },
                     used_percent
                 )),
-                Some(format!(
-                    "{:.2} / {:.2} ({}{}%{VALUES_COLOR})",
-                    SizeFormatter::new(used_swap, BINARY),
-                    SizeFormatter::new(total_swap, BINARY),
-                    {
-                        if used_percent_swap < SWAP_MEDIUM {
-                            LOW_COLOR
-                        } else if used_percent_swap < SWAP_HIGH {
-                            MEDIUM_COLOR
-                        } else {
-                            HIGH_COLOR
-                        }
-                    },
-                    used_percent_swap
-                )),
+                swap,
             )
         }
         Err(_) => (None, None, None),
