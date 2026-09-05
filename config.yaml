@@ -67,6 +67,8 @@ module_settings:
       # low is always 0
       medium: 20
       high: 80
+    blocklist:
+
 colors:
   title: "#b19cd9"
   title_sep: "a37"

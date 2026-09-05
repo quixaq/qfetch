@@ -156,6 +156,7 @@
                     medium = 20;
                     high = 80;
                   };
+                  blocklist = [ ];
                 };
               };
               colors = {
@@ -196,7 +197,7 @@
         in
         pkgs.rustPlatform.buildRustPackage {
           pname = "qfetch";
-          version = "0.3.0";
+          version = "0.3.1";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
           postPatch = "cp ${configFile} config.yaml";
