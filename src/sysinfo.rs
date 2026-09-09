@@ -135,6 +135,12 @@ pub fn cpu() -> Option<String> {
     }
 }
 
+fn parse_kb(line: &str) -> u64 {
+    line.split_whitespace()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0)
+}
 pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
     match sysinfo::sysinfo() {
         Ok(info) => {
@@ -164,7 +170,15 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
             }
 
             let total = info.ram_total();
-            let available = info.ram_unused();
+            let contents = fs::read_to_string("/proc/meminfo");
+            let available = match contents {
+                Ok(c) => c
+                    .lines()
+                    .find(|line| line.starts_with("MemAvailable:"))
+                    .map(|line| parse_kb(line) * 1024)
+                    .unwrap_or_else(|| info.ram_unused()),
+                Err(_) => info.ram_unused(),
+            };
             let total_swap = info.swap_total();
             let free_swap = info.swap_free();
             let used = total - available;
