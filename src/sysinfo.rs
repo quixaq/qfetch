@@ -119,7 +119,7 @@ pub fn cpu() -> Option<String> {
             .map(|brand| brand.as_str().to_string())
     }
 
-    #[cfg(not(target_arch = "x86_64"))]
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
     {
         let file = std::fs::File::open("/proc/cpuinfo").ok()?;
         let reader = std::io::BufReader::new(file);
