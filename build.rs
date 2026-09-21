@@ -38,6 +38,7 @@ struct SwapSettings {
 #[derive(Deserialize)]
 struct MountsSettings {
     thresholds: ThresholdSettings,
+    no_default_blocklist: bool,
     blocklist: Vec<String>,
 }
 
@@ -335,6 +336,11 @@ fn main() {
     constants.push(format!(
         "pub const MOUNTS_HIGH: usize = {};",
         mounts_high_threshold
+    ));
+
+    constants.push(format!(
+        "pub const MOUNTS_NO_DEFAULT_BLOCKLIST: bool = {};",
+        config.module_settings.mounts.no_default_blocklist
     ));
 
     let mounts_blocklist = config.module_settings.mounts.blocklist;

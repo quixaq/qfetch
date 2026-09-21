@@ -156,6 +156,7 @@
                     medium = 20;
                     high = 80;
                   };
+                  no_default_blocklist = false;
                   blocklist = [ ];
                 };
               };

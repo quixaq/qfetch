@@ -14,8 +14,9 @@ use gethostname::gethostname;
 
 use crate::{
     HIGH_COLOR, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_BLOCKLIST, MOUNTS_HIGH, MOUNTS_KEY,
-    MOUNTS_MEDIUM, MOUNTSPOINT_COLOR, RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH,
-    SWAP_MEDIUM, TITLE_COLOR, TITLE_SEP_CHAR, TITLE_SEP_COLOR, VALUES_COLOR,
+    MOUNTS_MEDIUM, MOUNTS_NO_DEFAULT_BLOCKLIST, MOUNTSPOINT_COLOR, RAM_HIGH, RAM_MEDIUM,
+    SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, TITLE_SEP_CHAR, TITLE_SEP_COLOR,
+    VALUES_COLOR,
 };
 
 pub fn title() -> (Option<String>, Option<String>) {
@@ -272,9 +273,9 @@ pub fn mounts() -> Option<String> {
 
             let allowed_source = source.starts_with("/dev/") && !source.starts_with("/loop");
 
-            let allowed_path = !(path.starts_with("/boot")
-                || path == "/var/lib/containers/storage/overlay"
-                || MOUNTS_BLOCKLIST.contains(&path.as_str()));
+            let allowed_path = !(!MOUNTS_NO_DEFAULT_BLOCKLIST
+                && (path.starts_with("/boot") || path == "/var/lib/containers/storage/overlay"))
+                && !MOUNTS_BLOCKLIST.contains(&path.as_str());
 
             let unique_source = seen_sources.insert(source.clone());
 
