@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- *     qfetch v0.3.3
+ *     qfetch v0.3.4
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
