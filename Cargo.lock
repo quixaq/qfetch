@@ -108,9 +108,9 @@ checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
 name = "getgpuname"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65ff17560468ba3711759502c5e72eb4f2bb673dc47818811573641ae012bef2"
+checksum = "4b497de70d05b9c6c60fb63fd1ded8638320e0525340a7972f9cd1c189b91738"
 dependencies = [
  "pci-ids",
  "phf 0.13.1",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "qfetch-cli"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "cargo-build",
  "color-backtrace",
