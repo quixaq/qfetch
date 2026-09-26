@@ -1,26 +1,53 @@
 // SPDX-FileCopyrightText: 2026 Quixaq
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use humansize::{BINARY, SizeFormatter};
-use nix::ifaddrs::getifaddrs;
-use nix::sys::{statvfs, sysinfo, utsname::uname};
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-use raw_cpuid::CpuId;
-use std::fmt::Write;
-use std::fs::{self, File};
-use std::io::{BufRead, BufReader};
-use std::net::Ipv4Addr;
+use std::fs;
+
+#[cfg(title)]
+use crate::{TITLE_COLOR, TITLE_SEP_CHAR, TITLE_SEP_COLOR};
+
+#[cfg(kernel)]
+use nix::sys::utsname::uname;
+
+#[cfg(shell)]
 use std::path::Path;
 
+#[cfg(gpu)]
 use gethostname::gethostname;
 
-use crate::{
-    HIGH_COLOR, IP_PRINT_INTERFACE, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_BLOCKLIST,
-    MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM, MOUNTS_NO_DEFAULT_BLOCKLIST, MOUNTSPOINT_COLOR,
-    RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, TITLE_SEP_CHAR,
-    TITLE_SEP_COLOR, VALUES_COLOR,
-};
+#[cfg(any(uptime, ram, swap))]
+use crate::{RAM_HIGH, RAM_MEDIUM, SWAP_HIGH, SWAP_MEDIUM};
+#[cfg(any(uptime, ram, swap))]
+use nix::sys::sysinfo;
+#[cfg(any(uptime, ram, swap))]
+use std::fmt::Write;
 
+#[cfg(mounts)]
+use crate::{
+    KEYS_COLOR, MOUNTS_BLOCKLIST, MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM,
+    MOUNTS_NO_DEFAULT_BLOCKLIST, MOUNTSPOINT_COLOR, SEPARATOR_COLOR,
+};
+#[cfg(mounts)]
+use nix::sys::statvfs;
+#[cfg(mounts)]
+use std::fs::File;
+#[cfg(mounts)]
+use std::io::{BufRead, BufReader};
+
+#[cfg(any(uptime, ram, swap, mounts))]
+use crate::{HIGH_COLOR, LOW_COLOR, MEDIUM_COLOR, VALUES_COLOR};
+#[cfg(any(uptime, ram, swap, mounts))]
+use humansize::{BINARY, SizeFormatter};
+
+#[cfg(ip)]
+use nix::ifaddrs::getifaddrs;
+#[cfg(ip)]
+use std::net::Ipv4Addr;
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use raw_cpuid::CpuId;
+
+#[cfg(title)]
 pub fn title() -> (Option<String>, Option<String>) {
     let Ok(user) = std::env::var("USER").or_else(|_| std::env::var("LOGNAME")) else {
         return (None, None);
@@ -61,6 +88,7 @@ pub fn distro() -> (Option<String>, Option<String>, Option<String>) {
     (pretty, id, id_like)
 }
 
+#[cfg(kernel)]
 pub fn kernel() -> Option<String> {
     let uts = uname().ok()?;
     Some(format!(
@@ -70,12 +98,14 @@ pub fn kernel() -> Option<String> {
     ))
 }
 
+#[cfg(host)]
 pub fn host() -> Option<String> {
     let content = fs::read_to_string("/sys/class/dmi/id/product_name").ok()?;
     let product = content.trim();
     Some(product.to_owned())
 }
 
+#[cfg(shell)]
 pub fn shell() -> Option<String> {
     std::env::var("SHELL").ok().and_then(|path| {
         Path::new(&path)
@@ -85,6 +115,7 @@ pub fn shell() -> Option<String> {
     })
 }
 
+#[cfg(de)]
 pub fn de() -> Option<String> {
     std::env::var("XDG_CURRENT_DESKTOP")
         .ok()
@@ -92,10 +123,12 @@ pub fn de() -> Option<String> {
         .or_else(|| std::env::var("XDG_SESSION_DESKTOP").ok())
 }
 
+#[cfg(theme)]
 pub fn theme() -> Option<String> {
     std::env::var("GTK_THEME").ok()
 }
 
+#[cfg(cursor)]
 pub fn cursor() -> Option<String> {
     if let Ok(xcursor) = std::env::var("XCURSOR_THEME") {
         if let Ok(size) = std::env::var("XCURSOR_SIZE") {
@@ -112,6 +145,7 @@ pub fn cursor() -> Option<String> {
     None
 }
 
+#[cfg(cpu)]
 pub fn cpu() -> Option<String> {
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
@@ -138,12 +172,14 @@ pub fn cpu() -> Option<String> {
     }
 }
 
+#[cfg(any(uptime, ram, swap))]
 fn parse_kb(line: &str) -> u64 {
     line.split_whitespace()
         .nth(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(0)
 }
+#[cfg(any(uptime, ram, swap))]
 pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
     match sysinfo::sysinfo() {
         Ok(info) => {
@@ -232,16 +268,19 @@ pub fn sysinfo() -> (Option<String>, Option<String>, Option<String>) {
     }
 }
 
+#[cfg(gpu)]
 pub fn gpu() -> Option<String> {
     getgpuname::get_gpu_name()
 }
 
+#[cfg(locale)]
 pub fn locale() -> Option<String> {
     std::env::var("LC_ALL")
         .or_else(|_| std::env::var("LANG"))
         .ok()
 }
 
+#[cfg(mounts)]
 pub fn mounts() -> Option<String> {
     let Ok(file) = File::open("/proc/mounts") else {
         return None;
@@ -301,6 +340,7 @@ pub fn mounts() -> Option<String> {
     Some(out).filter(|s| !s.is_empty())
 }
 
+#[cfg(ip)]
 pub fn local_ip() -> Option<String> {
     let addrs = getifaddrs().ok()?;
     for ifaddr in addrs {
@@ -310,10 +350,13 @@ pub fn local_ip() -> Option<String> {
                 if !ip.is_private() {
                     continue;
                 }
-                if IP_PRINT_INTERFACE {
+                #[cfg(ip_print_interface)]
+                {
                     let interface = ifaddr.interface_name;
                     return Some(format!("{} ({})", ip.to_string(), interface));
-                } else {
+                }
+                #[cfg(not(ip_print_interface))]
+                {
                     return Some(ip.to_string());
                 }
             }

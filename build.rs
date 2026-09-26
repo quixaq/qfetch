@@ -180,6 +180,11 @@ fn main() {
     let mut info: Vec<(usize, String, String)> = Vec::new();
 
     for (index, module) in config.modules.general.iter().enumerate() {
+        cargo_build::rustc_check_cfg(&module.id, std::iter::empty::<&str>());
+        if !module.enabled {
+            continue;
+        }
+
         // the following block is here to block the module id as a vector for arbitrary code execution
         if !matches!(
             module.id.as_str(),
@@ -226,11 +231,7 @@ fn main() {
             }
         };
 
-        constants.push(format!(
-            "pub const {}_ENABLED: bool = {};",
-            module.id.to_uppercase(),
-            module.enabled
-        ));
+        cargo_build::rustc_cfg(&module.id);
     }
 
     info.push((253, "".to_owned(), "palette_sep".to_owned()));
@@ -357,13 +358,16 @@ fn main() {
     ));
 
     let print_interface = config.module_settings.ip.print_interface;
-    constants.push(format!(
-        "pub const IP_PRINT_INTERFACE: bool = {};",
-        print_interface
-    ));
+    cargo_build::rustc_check_cfg("ip_print_interface", std::iter::empty::<&str>());
+    if print_interface {
+        cargo_build::rustc_cfg("ip_print_interface");
+    }
 
     let logo_enabled = config.logo.enabled;
-    constants.push(format!("pub const LOGO_ENABLED: bool = {};", logo_enabled));
+    cargo_build::rustc_check_cfg("logo", std::iter::empty::<&str>());
+    if logo_enabled {
+        cargo_build::rustc_cfg("logo");
+    }
 
     let included_logos = config.logo.include;
     let mut logos: Vec<String> = Vec::new();

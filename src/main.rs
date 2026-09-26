@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- *     qfetch v0.4.0
+ *     qfetch v0.4.1
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,94 +26,60 @@ use console::{measure_text_width, truncate_str};
 use std::fmt::Write;
 use terminal_size::{Width, terminal_size};
 
+#[cfg(standard_palette)]
 const STANDARD_PALETTE: &str = "\x1b[40m   \x1b[41m   \x1b[42m   \x1b[43m   \x1b[44m   \x1b[45m   \x1b[46m   \x1b[47m   \x1b[0m";
+#[cfg(bright_palette)]
 const BRIGHT_PALETTE: &str = "\x1b[100m   \x1b[101m   \x1b[102m   \x1b[103m   \x1b[104m   \x1b[105m   \x1b[106m   \x1b[107m   \x1b[0m";
 
 fn main() {
-    let (mut os, id, id_like) = sysinfo::distro();
-    if !OS_ENABLED {
-        os = None
-    }
-    let (title, sep) = if TITLE_ENABLED {
-        sysinfo::title()
-    } else {
-        (None, None)
-    };
-    let host = if HOST_ENABLED { sysinfo::host() } else { None };
-    let shell = if SHELL_ENABLED {
-        sysinfo::shell()
-    } else {
-        None
-    };
-    let kernel = if KERNEL_ENABLED {
-        sysinfo::kernel()
-    } else {
-        None
-    };
-    let de = if DE_ENABLED { sysinfo::de() } else { None };
-    let theme = if THEME_ENABLED {
-        sysinfo::theme()
-    } else {
-        None
-    };
-    let cursor = if CURSOR_ENABLED {
-        sysinfo::cursor()
-    } else {
-        None
-    };
-    let cpu = if CPU_ENABLED { sysinfo::cpu() } else { None };
-    let gpu = if GPU_ENABLED { sysinfo::gpu() } else { None };
-    let (uptime, ram, swap) = if SWAP_ENABLED || RAM_ENABLED || SWAP_ENABLED {
-        let (u, r, s) = sysinfo::sysinfo();
-        (
-            if UPTIME_ENABLED { u } else { None },
-            if RAM_ENABLED { r } else { None },
-            if SWAP_ENABLED { s } else { None },
-        )
-    } else {
-        (None, None, None)
-    };
-    let mounts = if MOUNTS_ENABLED {
-        sysinfo::mounts()
-    } else {
-        None
-    };
-    let ip = if IP_ENABLED {
-        sysinfo::local_ip()
-    } else {
-        None
-    };
-    let locale = if LOCALE_ENABLED {
-        sysinfo::locale()
-    } else {
-        None
-    };
-    let palette_sep = if STANDARD_PALETTE_ENABLED || BRIGHT_PALETTE_ENABLED {
-        Some("\n".to_string())
-    } else {
-        None
-    };
-    let standard_palette = if STANDARD_PALETTE_ENABLED {
-        Some(STANDARD_PALETTE.to_string())
-    } else {
-        None
-    };
-    let bright_palette = if BRIGHT_PALETTE_ENABLED {
-        Some(BRIGHT_PALETTE.to_string())
-    } else {
-        None
-    };
+    let (os, id, id_like) = sysinfo::distro();
+
+    #[cfg(title)]
+    let (title, sep) = sysinfo::title();
+    #[cfg(host)]
+    let host = sysinfo::host();
+    #[cfg(shell)]
+    let shell = sysinfo::shell();
+    #[cfg(kernel)]
+    let kernel = sysinfo::kernel();
+    #[cfg(de)]
+    let de = sysinfo::de();
+    #[cfg(theme)]
+    let theme = sysinfo::theme();
+    #[cfg(cursor)]
+    let cursor = sysinfo::cursor();
+    #[cfg(cpu)]
+    let cpu = sysinfo::cpu();
+    #[cfg(gpu)]
+    let gpu = sysinfo::gpu();
+    #[cfg(any(uptime, ram, swap))]
+    let (uptime, ram, swap) = sysinfo::sysinfo();
+    #[cfg(mounts)]
+    let mounts = sysinfo::mounts();
+    #[cfg(ip)]
+    let ip = sysinfo::local_ip();
+    #[cfg(locale)]
+    let locale = sysinfo::locale();
+    #[cfg(any(standard_palette, bright_palette))]
+    let palette_sep = Some("\n".to_string());
+    #[cfg(standard_palette)]
+    let standard_palette = Some(STANDARD_PALETTE.to_string());
+    #[cfg(bright_palette)]
+    let bright_palette = Some(BRIGHT_PALETTE.to_string());
 
     let info = include!(concat!(env!("OUT_DIR"), "/modules.rs"));
 
     let mut out = String::with_capacity(256);
-    let mut logo = "";
-    if LOGO_ENABLED {
-        logo = get_logo(
-            &id.unwrap_or("".to_string()),
-            &id_like.unwrap_or("".to_string()),
-        );
-    }
+
+    #[cfg(logo)]
+    let logo = get_logo(
+        &id.unwrap_or("".to_string()),
+        &id_like.unwrap_or("".to_string()),
+    );
+
+    #[cfg(not(logo))]
+    let logo = "";
+
     let logo_lines: Vec<&str> = logo.lines().collect();
     let logo_line_fallback = logo
         .lines()
