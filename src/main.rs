@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
- *     qfetch v0.3.5
+ *     qfetch v0.4.0
  * Copyright (C) 2026  Quixaq
  *
  * This program is free software: you can redistribute it and/or modify
@@ -75,6 +75,11 @@ fn main() {
     };
     let mounts = if MOUNTS_ENABLED {
         sysinfo::mounts()
+    } else {
+        None
+    };
+    let ip = if IP_ENABLED {
+        sysinfo::local_ip()
     } else {
         None
     };

@@ -42,6 +42,9 @@ modules:
     - id: mounts
       enabled: true
       key: Disk
+    - id: ip
+      enabled: true
+      key: Private IP
     - id: locale
       enabled: true
       key: Locale
@@ -69,6 +72,8 @@ module_settings:
       high: 80
     no_default_blocklist: false # paths blocked by default are /boot and /var/lib/containers/storage/overlay
     blocklist:
+  ip:
+    print_interface: true
 
 colors:
   title: "#b19cd9"

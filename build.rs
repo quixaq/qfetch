@@ -43,11 +43,17 @@ struct MountsSettings {
 }
 
 #[derive(Deserialize)]
+struct PrivateIpSettings {
+    print_interface: bool,
+}
+
+#[derive(Deserialize)]
 struct ModuleSettings {
     title: TitleSettings,
     ram: RamSettings,
     swap: SwapSettings,
     mounts: MountsSettings,
+    ip: PrivateIpSettings,
 }
 
 #[derive(Deserialize)]
@@ -191,6 +197,7 @@ fn main() {
                 | "ram"
                 | "swap"
                 | "mounts"
+                | "ip"
                 | "locale"
                 | "standard_palette"
                 | "bright_palette"
@@ -347,6 +354,12 @@ fn main() {
     constants.push(format!(
         "pub const MOUNTS_BLOCKLIST: &[&'static str] = &[\"{}\"];",
         mounts_blocklist.join("\", \"")
+    ));
+
+    let print_interface = config.module_settings.ip.print_interface;
+    constants.push(format!(
+        "pub const IP_PRINT_INTERFACE: bool = {};",
+        print_interface
     ));
 
     let logo_enabled = config.logo.enabled;

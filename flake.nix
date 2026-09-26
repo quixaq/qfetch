@@ -107,18 +107,23 @@
               enabled = true;
               key = "Disk";
             };
-            locale = {
+            ip = {
               index = 15;
+              enabled = true;
+              key = "Private IP";
+            };
+            locale = {
+              index = 16;
               enabled = true;
               key = "Locale";
             };
             standard_palette = {
-              index = 15;
+              index = 17;
               enabled = true;
               key = "";
             };
             bright_palette = {
-              index = 16;
+              index = 18;
               enabled = true;
               key = "";
             };
@@ -159,6 +164,9 @@
                   no_default_blocklist = false;
                   blocklist = [ ];
                 };
+                ip = {
+                  print_interface = true;
+                };
               };
               colors = {
                 title = "#b19cd9";
@@ -198,7 +206,7 @@
         in
         pkgs.rustPlatform.buildRustPackage {
           pname = "qfetch";
-          version = "0.3.5";
+          version = "0.4.0";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
           postPatch = "cp ${configFile} config.yaml";

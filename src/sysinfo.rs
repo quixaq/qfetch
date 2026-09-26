@@ -2,21 +2,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use humansize::{BINARY, SizeFormatter};
+use nix::ifaddrs::getifaddrs;
 use nix::sys::{statvfs, sysinfo, utsname::uname};
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use raw_cpuid::CpuId;
 use std::fmt::Write;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
+use std::net::Ipv4Addr;
 use std::path::Path;
 
 use gethostname::gethostname;
 
 use crate::{
-    HIGH_COLOR, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_BLOCKLIST, MOUNTS_HIGH, MOUNTS_KEY,
-    MOUNTS_MEDIUM, MOUNTS_NO_DEFAULT_BLOCKLIST, MOUNTSPOINT_COLOR, RAM_HIGH, RAM_MEDIUM,
-    SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, TITLE_SEP_CHAR, TITLE_SEP_COLOR,
-    VALUES_COLOR,
+    HIGH_COLOR, IP_PRINT_INTERFACE, KEYS_COLOR, LOW_COLOR, MEDIUM_COLOR, MOUNTS_BLOCKLIST,
+    MOUNTS_HIGH, MOUNTS_KEY, MOUNTS_MEDIUM, MOUNTS_NO_DEFAULT_BLOCKLIST, MOUNTSPOINT_COLOR,
+    RAM_HIGH, RAM_MEDIUM, SEPARATOR_COLOR, SWAP_HIGH, SWAP_MEDIUM, TITLE_COLOR, TITLE_SEP_CHAR,
+    TITLE_SEP_COLOR, VALUES_COLOR,
 };
 
 pub fn title() -> (Option<String>, Option<String>) {
@@ -297,4 +299,25 @@ pub fn mounts() -> Option<String> {
     }
 
     Some(out).filter(|s| !s.is_empty())
+}
+
+pub fn local_ip() -> Option<String> {
+    let addrs = getifaddrs().ok()?;
+    for ifaddr in addrs {
+        if let Some(storage) = ifaddr.address {
+            if let Some(inet) = storage.as_sockaddr_in() {
+                let ip = Ipv4Addr::from(inet.ip());
+                if !ip.is_private() {
+                    continue;
+                }
+                if IP_PRINT_INTERFACE {
+                    let interface = ifaddr.interface_name;
+                    return Some(format!("{} ({})", ip.to_string(), interface));
+                } else {
+                    return Some(ip.to_string());
+                }
+            }
+        }
+    }
+    None
 }
